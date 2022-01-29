@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="/">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+
+    <title>Registration</title>
+</head>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+    }
+    
+    html,body{
+        background: #f1f5f3;
+        color: #1c1d1e;
+        font-family: 'Poppins',sans-serif;
+    }
+
+    .registerForm{
+        background: #f1f5f3;
+        background-size: cover;
+        min-height: 100vh;
+    }
+
+    .container{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .container .form{
+        background: #fff;
+        padding: 1em 2em 1em 2em;
+
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+
+        margin-top: 5%;
+    }
+
+    .form > div{
+        margin: 6%;
+    }
+
+    input{
+        padding: .6em .8em .6em .8em;
+        outline: none;
+        background: #f1f5f3;
+        border: none;
+        border-radius: 4px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    button {
+        position: relative;
+        font-size: .8rem;
+        text-transform: uppercase;
+        text-decoration: none;
+        padding: .5em 1.5em;
+        display: inline-block;
+        border-radius: 6em;
+        transition: all .2s;
+        border: .28px solid #222;
+        font-family: inherit;
+        font-weight: 500;
+        color: black;
+        background-color: white;
+        cursor: pointer;
+}
+
+    button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    button:active {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .title h2{
+        text-transform: capitalize;
+        margin-bottom: 10%;
+    }
+    
+    .notification{
+        position: absolute;
+        top: -5%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        transition: .5s;
+    }
+
+    .notification.active{
+        top: 5%;
+    }
+
+    .notification h2{
+        background: #fff;
+        padding: .4em .8em .4em .8em;
+        font-size: 1.1rem;
+    }
+</style>
+<body>
+    <div class="notification">
+        <!-- <h2>Success ✔</h2> -->
+    </div>
+    <section class="registerForm">
+        <div class="container">
+            <div class="form">
+                <div class="title">
+                    <h2>Register</h2>
+                </div>
+                <div class="name">
+                    <input type="text" id="name" placeholder="Name" autocomplete="off">
+                </div>
+                <div class="email">
+                    <input type="email" id="email" placeholder="Email" autocomplete="off">
+                </div>
+                <div class="contact">
+                    <input type="text" id="contact" placeholder="Contact Number" autocomplete="off">
+                </div>
+                <div class="password">
+                    <input type="password" id="password" placeholder="Enter Password" autocomplete="off">
+                </div>
+                <div class="button">
+                    <button id="registerButton">Sign Up</button>
+                </div>
+                <div class="button">
+                    <a href="/login"><button>Login</button></a>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+<script src="js/register.js"></script>
+</html>
