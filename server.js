@@ -90,7 +90,12 @@ app.post("/postregister",(request,response)=>{
                     .catch(err=>console.log("Error: ",err));
             }
         })
-        .catch(err=>console.log("Error: ",err));
+        .catch((err)=>{
+            console.log("Error: ",err);
+            response.status(503).json({
+                responseCode : 503
+            })
+        });
 
 })
 
@@ -123,7 +128,12 @@ app.post("/postlogin",(request,response)=>{
                 })
             }
         })
-        .catch(err=>console.log("Error: ",err));
+        .catch((err)=>{
+            console.log("Error: ",err);
+            response.status(503).json({
+                responseCode : 503
+            })
+        });
 })
 
 app.get("/register",authenticated,(request,response)=>{
