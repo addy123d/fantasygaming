@@ -1,72 +1,144 @@
 const express = require("express");
+const mongo = require("mongoose");
+const session = require("express-session");
+const dbkey = require("./setup/config").url;
 const websocket = require("ws");
 const ejs = require("ejs");
-const {createUser,validate} = require("./utils/auth.js");
 const matches = require("./utils/matches.json");
 const port = process.env.PORT || 5000;
 const host = "127.0.0.1";
 
 let app = express();
 
-app.use("/",express.static(__dirname+"/client"));
+app.set('trust proxy', 1) // trust first proxy
+app.use(session({
+    name: "user",
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false, httpOnly: true, path: "/" }
+}))
+
+// Import Tables
+const User = require("./tables/User");
+
+// Database Connection !
+mongo.connect(dbkey)
+    .then(()=>{
+        console.log("Database Connected Successfully !");
+    })
+    .catch(err=>console.log("Error: ",err));
+
+app.use(express.static(__dirname+"/client"));
 app.set("view engine","ejs");
 app.use(express.json());
 app.use(express.urlencoded({"extended":false}));
 
+function unauthenticated(request, response, next) {
+    console.log(request.session);
+
+    if (request.session.email != undefined) {
+        next();
+    } else {
+        response.redirect("/login");
+    }
+}
+
+function authenticated(request, response, next) {
+    if (request.session.email) {
+        response.redirect("/");
+    } else {
+        next();
+    }
+}
+
+app.get("/",(request,response)=>{
+    let sessionStatus = false;
+
+    if(request.session.email != undefined) sessionStatus = true;
+
+    response.render("index",{sessionStatus});
+})
+
 // Auth Routes
 app.post("/postregister",(request,response)=>{
     console.log(request.body);
-    let responseObject = createUser(request.body);
 
-    if(responseObject.responseCode === 200){
-        console.log("Users stored: ");
-        console.log(responseObject.users);
-    
-        response.json({
-            message : "Registration Success",
-            responseCode : 200
-        })
-    }else{
-        response.json({
-            message: "User already exists with this email",
-            responseCode : 503
-        })
-    }
+    const {name,email,contact,password} = request.body;
 
+    User.findOne({email : email})
+        .then((user)=>{
+            if(user){
+                response.status(503).json({
+                    responseCode : 503
+                })
+            }else{
+                let userObject = {name,email,contact,password};
+
+                new User(userObject).save()
+                    .then((user)=>{
+                        console.log("User registered successfully !");
+
+                        // Store Sessions !
+                        request.session.email = user.email;
+                        request.session.contact = user.contact;
+
+                        response.status(200).json({
+                            responseCode : 200
+                        })
+                    })
+                    .catch(err=>console.log("Error: ",err));
+            }
+        })
+        .catch(err=>console.log("Error: ",err));
 
 })
 
 app.post("/postlogin",(request,response)=>{
     console.log(request.body);
 
-    let responseObject = validate(request.body);
+    const {email,password} = request.body;
 
-    if(responseObject === -1){
-        response.json({
-            message : "User need to register first ☹",
-            responseCode : 503
+    User.findOne({email : email})
+        .then((user)=>{
+            if(user){
+                if(user.password === password){
+
+                    // Store Sessions !
+                    request.session.email = user.email;
+                    request.session.contact = user.contact;
+
+                    response.status(200).json({
+                        responseCode : 200
+                    })
+
+                }else{
+                    response.status(503).json({
+                        responseCode : 503
+                    })
+                }
+            }else{
+                response.status(503).json({
+                    responseCode : 503
+                })
+            }
         })
-    }else{
-        if(responseObject.message === "access denied"){
-            response.json({
-                message : "Password not matched !",
-                responseCode : 503
-            })
-        }else{
-            response.json({
-                message : `Welcome Back, ${responseObject.user.name}`,
-                responseCode : 200
-            })
-        }
-    }
+        .catch(err=>console.log("Error: ",err));
 })
 
-app.get("/register",(request,response)=>{
+app.get("/register",authenticated,(request,response)=>{
     response.render("register");
 })
 
-app.get("/login",(request,response)=>{
+app.get("/login",authenticated,(request,response)=>{
     response.render("login");
+})
+
+app.get("/logout", unauthenticated, (request, response) => {
+    request.session.destroy(function (err) {
+        // cannot access session here
+        response.redirect("/login")
+    });
 })
 
 const httpServer = app.listen(port,host,()=>{

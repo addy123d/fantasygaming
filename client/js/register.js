@@ -29,6 +29,11 @@ registerButton.addEventListener("click",()=>{
             if(result.responseCode === 200){
                 notification.innerHTML = "<h2>Success ✔</h2>";
                 notification.classList.add("active");
+
+                setTimeout(()=>{
+                    location.href = "/";
+                },1000);
+                
             }else{
                 notification.innerHTML = "<h2>Failed ❌</h2>";
                 notification.classList.add("active");

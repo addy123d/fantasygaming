@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <base href="/">
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -218,14 +219,21 @@
 
 <body>
     <div class="authButton">
-        <a href="/register"><button class="cta">
-            <span class="hover-underline-animation"> Join Now </span>
-            <svg id="arrow-horizontal" xmlns="http://www.w3.org/2000/svg" width="30" height="10" viewBox="0 0 46 16">
-                <path id="Path_10" data-name="Path 10"
-                    d="M8,0,6.545,1.455l5.506,5.506H-30V9.039H12.052L6.545,14.545,8,16l8-8Z" transform="translate(30)">
-                </path>
-            </svg>
-        </button></a>
+        <%if(sessionStatus){%>
+            <a href="/createRoom"><button class="cta">
+                <span class="hover-underline-animation"> Create Room </span>
+            </button></a>
+            <%}else{%>
+                <a href="/register"><button class="cta">
+                    <span class="hover-underline-animation"> Join Now </span>
+                    <svg id="arrow-horizontal" xmlns="http://www.w3.org/2000/svg" width="30" height="10" viewBox="0 0 46 16">
+                        <path id="Path_10" data-name="Path 10"
+                            d="M8,0,6.545,1.455l5.506,5.506H-30V9.039H12.052L6.545,14.545,8,16l8-8Z" transform="translate(30)">
+                        </path>
+                    </svg>
+                </button></a>
+            <%}%>
+
     </div>
     <section class="explorePage">
 
@@ -236,18 +244,7 @@
         </div>
 
         <div class="grid">
-            <!-- <article>
-                    <img src="<%=repos[i].owner.avatar_url%>" alt="Sample photo">
-                    <div class="text">
-                        <h3><i class="fa fa-user" aria-hidden="true"></i>
-                            <%=repos[i].owner.login%>
-                        </h3>
-                        <p><strong>Repository</strong> : <%=repos[i].full_name%>
-                        </p>
-                        <a href="/repositories?username=<%=repos[i].owner.login%>"><button>View <i class="fa fa-eye"
-                                    aria-hidden="true"></i></button></a>
-                    </div>
-                </article> -->
+
         </div>
     </section>
 </body>
