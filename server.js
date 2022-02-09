@@ -1,11 +1,12 @@
 const express = require("express");
 const mongo = require("mongoose");
 const session = require("express-session");
+const socket = require("socket.io");
 const dbkey = require("./setup/config").url;
 const websocket = require("ws");
 const ejs = require("ejs");
 const matches = require("./utils/matches.json");
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3000;
 const host = "127.0.0.1";
 
 let app = express();
@@ -51,6 +52,8 @@ function authenticated(request, response, next) {
         next();
     }
 }
+
+const rooms = [];
 
 app.get("/",(request,response)=>{
     let sessionStatus = false;
@@ -144,6 +147,14 @@ app.get("/login",authenticated,(request,response)=>{
     response.render("login");
 })
 
+app.get("/createRoom",unauthenticated,(request,response)=>{
+    response.render("room.ejs");
+})
+
+app.get("/chat",unauthenticated,(request,response)=>{
+    response.render("chatroom");
+})
+
 app.get("/logout", unauthenticated, (request, response) => {
     request.session.destroy(function (err) {
         // cannot access session here
@@ -154,6 +165,8 @@ app.get("/logout", unauthenticated, (request, response) => {
 const httpServer = app.listen(port,host,()=>{
     console.log("Server is running...");
 })
+
+const io = socket(httpServer);
 
 // Get Time !
 function getTime() {
@@ -198,15 +211,68 @@ function getTime() {
     return timeComponent;
 }
 
-const wss = new websocket.Server({server : httpServer});
+
+// Functions
+function pushRoom(id,group_name,name,socket_id,status){
+    //Push room to the rooms array !
+    // Create object
+    const room = {
+        id,group_name, names:[{ name : name, client_id: socket_id,status:status}]
+    };
+
+    // // Push this room into the rooms arrays
+    rooms.push(room);
+
+    console.log("Rooms :",rooms);
+
+    return room;
+};
+
+function pushNames(index,name,socket_id,status){
+ // Push name of the client into names array !
+    rooms[index].names.push({name : name, client_id : socket_id,status:status});
+    console.log("Clients :",rooms[index].names);
+
+    console.log("Rooms :",rooms);  
+
+    return rooms[index];
+};
+
+function userRetrieve(group_id,client_id){
+
+    const getIndex = rooms.findIndex((room)=>room.id===group_id);
+
+    try {
+        const userIndex = rooms[getIndex].names.findIndex((name)=>name.client_id === client_id);
+        return rooms[getIndex].names[userIndex];
+    } catch (error) {
+        console.log("Error :",error);
+        return null;
+    };
+    
+};
 
 
-wss.on("connection", (ws) => {
+function deleteUser(group_id,client_id){
+    const room = rooms.find((room)=>room.id === group_id);
+
+    if(room === undefined){
+        return -1;
+    }
+
+    const userIndex = room.names.findIndex((user)=>user.client_id === client_id);
+
+    if(userIndex != -1){
+        room.names.splice(userIndex,1);
+    }
+};
+
+io.on("connection",function(client){
 
     setInterval(() => {
         let matchesList = [];
 
-        let { hourtime, minutes, month, date } = getTime();
+        let {month, date } = getTime();
 
         // Check whether there are matches on particular date and month !
         // List out particular matches on particular date !
@@ -217,19 +283,120 @@ wss.on("connection", (ws) => {
             }
         })
 
-        ws.send(JSON.stringify({
+        // ws.send(JSON.stringify({
+        //     list : matchesList
+        // }))
+
+        client.emit("matches",{
             list : matchesList
-        }))
+        })
 
 
     }, 5000);
 
-    console.log(`Client with id ${ws} connected !`);
-})
+    // Send connection message to server
+    client.on("join",function(data){
+        console.log(data);
 
-wss.on("close", (ws) => {
-    console.log(`Client with id ${ws} disconnected !`);
-})
+        // Collect all information from data
+
+        const { id, group_name, name} = data;
+
+        // Search for room index in rooms array
+        const getIndex = rooms.findIndex((room)=>room.id === id);
+        console.log(getIndex);
+
+        if(getIndex >= 0){
+            // // Push name of the client into names array !
+            let status = "Participant";
+            const room = pushNames(getIndex,name,client.id,status);
+
+            client.join(room.id);
+            
+            client.to(room.id).emit("enter",{
+                message : `${name} entered the chat !`,
+                time : new Date().toLocaleTimeString()
+            });
+
+            io.to(room.id).emit("room",{
+                title: group_name,
+                names : room.names
+            });
+
+        }else{
+            // // Create object
+
+            let status = "Admin";
+
+            const room = pushRoom(id,group_name,name,client.id,status);
+
+            client.join(room.id);
+
+            io.to(room.id).emit("room",{
+                title: group_name,
+                names : room.names
+            });
+        }
+
+    });
+
+
+    // Collect messages from client
+    client.on("message", function(data){
+
+        client.to(data.id).emit("server_message",{
+            message : data.message,
+            name : data.name,
+            time : new Date().toLocaleTimeString()
+        });
+    });
+
+
+    //Send typing message
+    client.on("typing",function(data){
+        client.to(data.id).emit("server_type_message",{
+            type : data.type,
+            name : data.name
+        });
+    });
+
+    client.on("close", function(data){
+        // const id = data.id;
+        const {id} = data;
+
+        const user = userRetrieve(id,client.id);
+
+        console.log("User :",user);
+
+        if(user === null || user== undefined){
+            client.to(id).emit("leave",{
+                message : `${user} has left the chat !`
+            });
+        }else{
+            client.to(id).emit("leave",{
+                message : `${user.name} has left the chat !`,
+                time : new Date().toLocaleTimeString()
+            });
+        }
+
+        // Delete user
+        deleteUser(id,client.id);
+
+        const room = rooms.find((room)=>room.id=== id);
+
+        if(room === undefined){
+            return -1;
+        }
+
+        io.to(id).emit("room",{
+            names : room.names,
+            title: room.group_name
+        });
+    });
+
+
+    console.log("Client added !");
+});
 
 
 

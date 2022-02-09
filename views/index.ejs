@@ -190,7 +190,10 @@
     a{
         cursor: pointer;
     }
+
     .cta {
+        cursor: pointer;
+        outline: none;
         border: none;
         background: none;
     }
@@ -220,7 +223,7 @@
 <body>
     <div class="authButton">
         <%if(sessionStatus){%>
-            <a href="/createRoom"><button class="cta">
+            <a href="/createRoom"><button class="cta create">
                 <span class="hover-underline-animation"> Create Room </span>
             </button></a>
             <%}else{%>
@@ -248,23 +251,27 @@
         </div>
     </section>
 </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.3/socket.io.js"
+    integrity="sha512-Jr0UIR/Q8MUX+93zjDOhuDUKLqJZObtwpkLJQcR9qMaLgL0thet39IORuavUaZFkZ8a4ktrUsKPM9mf5LWMduA=="
+    crossorigin="anonymous"></script>
 <script>
-    const ws = new WebSocket(`ws://${location.host}/`);
-
+    const socket = io();
+    // const ws = new WebSocket(`ws://${location.host}/`);
     const containerGrid = document.querySelector(".grid");
+    const createRoom = document.querySelector(".create");
 
-    ws.onopen = () => {
-        console.log("Connected....");
-    }
+    // ws.onopen = () => {
+    //     console.log("Connected....");
+    // }
+    socket.on("join", function (data) {
+        console.log(data.message);
+    });
 
-    ws.onmessage = (data) => {
-        // console.log(data);
-
-        const actualData = JSON.parse(data.data);
-        console.log(actualData.list);
+    socket.on("matches",(data)=>{
+        console.log(data);
 
         let html = "";
-        actualData.list.forEach(element => {
+        data.list.forEach(element => {
             html += `<article>
                     <div class="text">
                         <h3><i class="fa fa-user" aria-hidden="true"></i>
@@ -277,7 +284,8 @@
         });
 
         containerGrid.innerHTML = html;
-    }
+    })
+
 
 </script>
 

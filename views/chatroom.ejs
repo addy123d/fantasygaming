@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room</title>
+</head>
+<style>
+    @import url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+p, li, input, button {
+  font-family: 'Open Sans', sans-serif;
+}
+
+body {
+  background: #f1f5f3;
+}
+
+.chatroom {
+  max-width: 400px;
+  width: 100%;
+  margin: 60px auto 0;
+  background: #fff;
+  border-radius: 5px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatroom_section {
+  padding: 10px 20px;
+}
+
+.chatroom_header {
+  border-bottom: 1px solid grey;
+}
+
+.chatroom_header_name {
+  position: relative;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.chatroom_header_name::before {
+    content: "<";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform:translatey(-50%);
+    font-weight: 900;
+  }
+
+.chatroom_history {
+  flex: 2;
+}
+
+.chatroom_history_list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+  overflow: scroll;
+}
+
+.chatroom_history_list_item {
+  margin-top: auto;
+  margin-bottom: 20px;
+  max-width: 75%;
+  width: 100%;
+  border-radius: 15px;
+  padding: 10px 20px;
+  color: #fff;
+}
+
+.chatroom_history_list_right  {
+  align-self: flex-end;
+}
+
+.chatroom_history_list_right:last-child {
+  background: grey;
+}
+
+.chatroom_history_list_item--grey {
+  background:grey;
+}
+
+.chatroom_history_list_item--blue {
+  background: navajowhite;
+}
+
+.chatroom_history_entering {
+  padding-top: 20px;
+}
+
+.chatroom_history_entering_spinner {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background: grey;
+  border-radius: 50%;
+  position: relative;
+  margin-left: 15px;
+  animation: 1.5s enteringMessage linear infinite;
+  animation-delay: .5s;
+}
+
+.chatroom_history_entering_spinner::before, .chatroom_history_entering_spinner::after {
+    content: "";
+    width: 10px;
+    height: 10px;
+    background: grey;
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+  }
+  
+  .chatroom_history_entering_spinner::before {
+    left: -15px;
+    animation: 1.5s enteringMessage linear infinite;
+  }
+  
+   .chatroom_history_entering_spinner::after {
+    left: 15px;
+    animation: 1.5s enteringMessage linear infinite;
+    animation-delay: .75s;
+  }
+
+.chatroom_history_entering_label {
+  display: inline-block;
+  margin-left: 15px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 12px;
+}
+
+.chatroom_form {
+  border-top: 1px solid grey;
+}
+
+.chatroom_form form {
+    display: flex;
+    justify-content: space-between;
+  }
+
+.chatroom_form_inputbox {
+  flex-basis: 70%;
+  max-width: 70%;
+}
+
+.chatroom_form_sendBtn {
+  flex-basis: 20%;
+  max-width: 20%;
+}
+
+
+@keyframes enteringMessage {
+  0% {
+    transform: scale(1);
+    background: rgba(139,139,139, .5);
+  }
+    100% {
+    transform: scale(.8);
+    background: rgba(139,139,139, 0);
+  }
+}
+</style>
+<body>
+    <div class="chatroom">
+        <div class="chatroom_section chatroom_header">
+          <div class="chatroom_section chatroom_header_name">Kitty</div>
+        </div>
+        <div class="chatroom_section chatroom_history">
+                <ul class="chatroom_history_list">
+                    <li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey">Lorem ipsum dolor sit amet.</li>
+                    <li class="chatroom_history_list_item chatroom_history_list_right chatroom_history_list_item--blue">consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</li>
+                    <li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</li>
+                    <li class="chatroom_history_list_item chatroom_history_list_right chatroom_history_list_item--blue">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur</li>
+                    <li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey">Excepteur sint occaecat cupidatat non proident</li>
+                    <li class="chatroom_history_list_item chatroom_history_list_right chatroom_history_list_item--blue">sunt in culpa qui officia deserunt mollit anim id est laborum</li>
+                </ul>
+          <!-- <div class="chatroom_history_entering">
+            <div class="chatroom_history_entering_spinner"></div>
+            <span class="chatroom_history_entering_label">Typing</span>
+          </div> -->
+        </div>
+        <div class="chatroom_section chatroom_form">
+            <form action="">
+                <input type="text" class="chatroom_form_inputbox" placeholder="Enter Message">
+                <button type="submit" class="chatroom_form_sendBtn">Send</button>
+                <button type="submit" class="chatroom_form_exitBtn">Exit</button>
+            </form>
+        </div>
+    </div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.3/socket.io.js"
+    integrity="sha512-Jr0UIR/Q8MUX+93zjDOhuDUKLqJZObtwpkLJQcR9qMaLgL0thet39IORuavUaZFkZ8a4ktrUsKPM9mf5LWMduA=="
+    crossorigin="anonymous"></script>
+<script>
+    // Get url parameters
+    const url_string = window.location.href;
+    const url = new URL(url_string);
+
+    const id = url.searchParams.get("id");
+    const group_name = url.searchParams.get("title");
+
+    console.log("Group ID :", id);
+    console.log("Group Name :", group_name);
+
+
+    const header = document.querySelector(".chatroom_header_name");
+    const exitButton = document.querySelector(".chatroom_form_exitBtn");
+    header.innerText = group_name;
+
+
+    // // Take controls of input box and button
+
+    const name = prompt("What's your name ?");
+
+    //Initialise connection using socket.io
+    const socket = io();
+
+    //Check whether server has accepted your connection request or not ! if yes then function will execute
+    socket.on("join", function (data) {
+        console.log(data.message);
+    });
+
+    // Send credentials to server !
+    socket.emit("join", {
+        id: id,
+        group_name: group_name,
+        name: name
+    });
+
+
+    socket.on("enter", function (data) {
+        // Display on body
+        // alert_message.innerHTML += `<h1>${data.message} <span>7.08PM</span></h1>`;
+        console.log("Participant Added: ");
+        console.log(data);
+
+        alert(`${data.message}`);
+    });
+
+    exitButton.addEventListener("click",()=>{
+      socket.emit("close", {
+            id: id
+        });
+
+        location.href = "/";
+    })
+
+    window.onbeforeunload = function () {
+        socket.emit("close", {
+            id: id
+        });
+    };
+
+
+    // Collect value from input box and send it to the websocket server
+    // button.addEventListener("click", sendData);
+
+    // Create function sendData
+    function sendData() {
+        console.log("Sent :", text_input.value);
+
+        // Send this input value to server
+        socket.emit("message", {
+            message: text_input.value,
+            name: name,
+            id: id
+        });
+
+    };
+
+    // Collect data sent by server !
+    socket.on("server_message", function (data) {
+        console.log("Recieved :", data.message);
+    });
+
+    // Typing...
+    // text_input.addEventListener("input", typing);
+
+    function typing() {
+        console.log("Typing...");
+        console.log(name);
+        socket.emit("typing", {
+            type: "Typing...",
+            name: name,
+            id: id
+        });
+    };
+
+    socket.on("server_type_message", function (data) {
+        console.log(data);
+    });
+
+
+    socket.on("leave", function (data) {
+        console.log(data);
+    });
+
+
+    // Room Information !
+    socket.on("room", function (data) {
+        console.log(data);
+    });
+</script>
+</html>

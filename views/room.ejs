@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@500&family=Poppins&family=Montserrat&family=Quicksand&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+        integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="css/room.css">
+    <title>Create Room</title>
+</head>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.form {
+    margin: 7%;
+    background: #ffffff;
+    padding: 1em 2em 1em 2em;
+    border-radius: 4px;
+}
+
+.name,
+.password,
+.plan,
+.btn {
+    display: flex;
+    justify-content: center;
+    margin: 10%;
+}
+
+input[type="text"] {
+    padding: 1em 1.5em 1em 1.5em;
+    border: none;
+    background: rgb(238, 235, 235);
+    border-radius: 5px;
+    outline: none;
+    font-family: 'Josefin Sans', sans-serif;
+}
+
+button {
+    padding: .7em 1em .7em 1em;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    background: rgb(25, 48, 70);
+    color: #ffffff;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    border-radius: 5px;
+    font-size: .8rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 2px #000000;
+}
+
+button:hover {
+    transition: all .3s;
+    background: rgb(77, 77, 77)
+}
+
+.form h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1.4rem;
+    margin: 2%;
+    border-bottom: .5px dashed #1c1d1e;
+    line-height: 50px;
+}
+    .roomPage {
+        background: rgb(55, 154, 247);
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url("https://img.search.brave.com/bOrTB2nAfhf_p4N03qGGhLYGn7Q4MnjP9EtQN-t1RS0/rs:fit:788:800:1/g:ce/aHR0cHM6Ly9kMTNp/cjUzc21xcWV5cC5j/bG91ZGZyb250Lm5l/dC9kMTEtc3RhdGlj/LXBhZ2VzL2xhbmRp/bmdfcGFnZS9ob21l/X2Rlc2t0b3BfZGhv/bmkucG5n");
+        background-size: cover;
+        min-height: 100vh;
+    }
+    .copy_notify {
+        margin: 2%;
+        color: #f5f5f5;
+        font-family: 'Poppins', cursive;
+        transition: all .5s;
+        display: none;
+    }
+</style>
+
+<body>
+    <div class="roomPage">
+        <form action="/chat" method="GET">
+            <div class="container">
+                <div class="form">
+                    <h2>Create Room <i class="fa fa-comment-o" aria-hidden="true"></i></h2>
+                    <div class="name">
+                        <input type="text" id="group_name" name="title" placeholder="Room Title" autocomplete="off">
+                    </div>
+                    <div class="id">
+                        <input type="text" id="unique_id" name="id">
+                    </div>
+
+                    <div class="btn">
+                        <button>Create</button>
+                    </div>
+        </form>
+    </div>
+    <!-- Link production ! -->
+    <input type="text" id="url" readonly>
+
+
+    <div class="copy_notify">
+        <h2>Copied !</h2>
+    </div>
+
+</body>
+<!-- <script src="/js/generateid.js"></script> -->
+<script>
+    
+   // Generate Unique ID 
+   const unique_id = document.getElementById("unique_id");
+   const id = Math.random().toString().split(".")[1];
+
+   unique_id.value = id;
+
+
+   // Copy Game 🔥 !
+   // Refer this link before writing copy logic !
+    // http://localhost:3000/chat?title=IOT&id=18446139016709107
+
+    const url = window.location.href;
+
+    const title_input = document.getElementById("group_name");
+    const copy_url = document.getElementById("url");
+    const notify = document.querySelector(".copy_notify");
+
+    title_input.addEventListener("input", function () {
+        const name_value = title_input.value;
+
+        const changed_url = url + "/chat?title=" + name_value + "&id=" + id;
+
+        display(changed_url);
+
+    });
+
+    function display(url) {
+        console.log("URL :", url);
+        copy_url.value = url;
+    };
+
+    copy_url.addEventListener("dblclick", function () {
+        copy_url.select();
+
+        document.execCommand("copy");
+
+        notify.style.display = "block";
+
+        // Disappear after 1s !
+        setInterval(function () {
+            notify.style.display = "none";
+        }, 1000);
+    });
+</script>
+</html>
