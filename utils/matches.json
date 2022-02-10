@@ -1,7 +1,7 @@
 [
     {   
         "matchNum" : "match1",
-        "date" : 7,
+        "date" : 10,
         "month" : "february",
         "homeTeam" : "MI",
         "awayTeam" : "RPS",
@@ -14,7 +14,7 @@
     },
     {   
         "matchNum" : "match2",
-        "date" : 7,
+        "date" : 10,
         "month" : "february",
         "homeTeam" : "KKR",
         "awayTeam" : "DD",
@@ -27,7 +27,7 @@
     },
     {   
         "matchNum" : "match3",
-        "date" : 7,
+        "date" : 10,
         "month" : "february",
         "homeTeam" : "KXIP",
         "awayTeam" : "GL",
@@ -54,7 +54,7 @@
     {   
         "matchNum" : "match5",
         "date" : 29,
-        "month" : "january",
+        "month" : "february",
         "homeTeam" : "KKR",
         "awayTeam" : "MI",
         "venue" : "Eden Gardens, Kolkata",
@@ -66,8 +66,8 @@
     },
     {   
         "matchNum" : "match6",
-        "date" : 29,
-        "month" : "january",
+        "date" : 10,
+        "month" : "february",
         "homeTeam" : "GL",
         "awayTeam" : "RPS",
         "venue" : "SCA, Rajkot",
