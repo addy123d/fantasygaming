@@ -105,8 +105,8 @@
     },
     {   
         "matchNum" : "match9",
-        "date" : 30,
-        "month" : "january",
+        "date" : 10,
+        "month" : "february",
         "homeTeam" : "MI",
         "awayTeam" : "GL",
         "venue" : "Wankhede Stadium, Mumbai",
@@ -118,7 +118,7 @@
     },
     {   
         "matchNum" : "match10",
-        "date" : 7,
+        "date" : 10,
         "month" : "february",
         "homeTeam" : "KXIP",
         "awayTeam" : "RPS",
