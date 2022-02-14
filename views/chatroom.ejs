@@ -176,12 +176,12 @@ body {
         </div>
         <div class="chatroom_section chatroom_history">
                 <ul class="chatroom_history_list">
-                    <li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey">Lorem ipsum dolor sit amet.</li>
-                    <li class="chatroom_history_list_item chatroom_history_list_right chatroom_history_list_item--blue">consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</li>
-                    <li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</li>
+                    <!-- <li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey">Lorem ipsum dolor sit amet.</li>
+                    <li class="chatroom_history_list_item chatroom_history_list_right chatroom_history_list_item--blue">consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</li> -->
+                    <!-- <li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</li>
                     <li class="chatroom_history_list_item chatroom_history_list_right chatroom_history_list_item--blue">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur</li>
                     <li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey">Excepteur sint occaecat cupidatat non proident</li>
-                    <li class="chatroom_history_list_item chatroom_history_list_right chatroom_history_list_item--blue">sunt in culpa qui officia deserunt mollit anim id est laborum</li>
+                    <li class="chatroom_history_list_item chatroom_history_list_right chatroom_history_list_item--blue">sunt in culpa qui officia deserunt mollit anim id est laborum</li> -->
                 </ul>
           <!-- <div class="chatroom_history_entering">
             <div class="chatroom_history_entering_spinner"></div>
@@ -189,11 +189,9 @@ body {
           </div> -->
         </div>
         <div class="chatroom_section chatroom_form">
-            <form action="">
-                <input type="text" class="chatroom_form_inputbox" placeholder="Enter Message">
-                <button type="submit" class="chatroom_form_sendBtn">Send</button>
+                <!-- <input type="text" class="chatroom_form_inputbox" placeholder="Enter Message">
+                <button type="submit" class="chatroom_form_sendBtn">Send</button> -->
                 <button type="submit" class="chatroom_form_exitBtn">Exit</button>
-            </form>
         </div>
     </div>
 </body>
@@ -214,6 +212,7 @@ body {
 
     const header = document.querySelector(".chatroom_header_name");
     const exitButton = document.querySelector(".chatroom_form_exitBtn");
+    const matches = document.querySelector(".chatroom_history_list");
     header.innerText = group_name;
 
 
@@ -223,6 +222,28 @@ body {
 
     //Initialise connection using socket.io
     const socket = io();
+
+    // Matches list !
+    socket.on("matches",(data)=>{
+        console.log(data);
+
+        let html = "";
+        data.list.forEach((element) => {
+            // html += `<article>
+            //         <div class="text">
+            //             <h3><i class="fa fa-user" aria-hidden="true"></i>
+            //                 ${element.homeTeam} X ${element.awayTeam}
+            //             </h3>
+            //             <br/>
+            //             <a href="#"><button>Create Team</button></a>
+            //         </div>
+            //     </article>`;
+
+            html += `<li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey">${element.homeTeam} X ${element.awayTeam} <button style="cursor:pointer">Create</button></li>`;
+        });
+
+        matches.innerHTML = html;
+    })
 
     //Check whether server has accepted your connection request or not ! if yes then function will execute
     socket.on("join", function (data) {
