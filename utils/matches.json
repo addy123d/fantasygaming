@@ -1,7 +1,7 @@
 [
     {   
         "matchNum" : "match1",
-        "date" : 10,
+        "date" : 14,
         "month" : "february",
         "homeTeam" : "MI",
         "awayTeam" : "RPS",
@@ -14,7 +14,7 @@
     },
     {   
         "matchNum" : "match2",
-        "date" : 10,
+        "date" : 14,
         "month" : "february",
         "homeTeam" : "KKR",
         "awayTeam" : "DD",
@@ -27,7 +27,7 @@
     },
     {   
         "matchNum" : "match3",
-        "date" : 10,
+        "date" : 14,
         "month" : "february",
         "homeTeam" : "KXIP",
         "awayTeam" : "GL",
@@ -40,8 +40,8 @@
     },
     {   
         "matchNum" : "match4",
-        "date" : 29,
-        "month" : "january",
+        "date" : 14,
+        "month" : "february",
         "homeTeam" : "RCB",
         "awayTeam" : "SH",
         "venue" : "M Chinnaswamy Stadium, Bangalore",
@@ -53,7 +53,7 @@
     },
     {   
         "matchNum" : "match5",
-        "date" : 29,
+        "date" : 14,
         "month" : "february",
         "homeTeam" : "KKR",
         "awayTeam" : "MI",
@@ -105,7 +105,7 @@
     },
     {   
         "matchNum" : "match9",
-        "date" : 10,
+        "date" : 14,
         "month" : "february",
         "homeTeam" : "MI",
         "awayTeam" : "GL",
@@ -118,7 +118,7 @@
     },
     {   
         "matchNum" : "match10",
-        "date" : 10,
+        "date" : 14,
         "month" : "february",
         "homeTeam" : "KXIP",
         "awayTeam" : "RPS",

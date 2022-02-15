@@ -334,7 +334,8 @@ io.on("connection",function(client){
 
             io.to(room.id).emit("room",{
                 title: group_name,
-                names : room.names
+                names : room.names,
+                message : "leave"
             });
         }
 
@@ -361,7 +362,6 @@ io.on("connection",function(client){
     });
 
     client.on("close", function(data){
-        // const id = data.id;
         const {id} = data;
 
         const user = userRetrieve(id,client.id);
