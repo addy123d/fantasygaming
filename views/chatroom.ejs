@@ -189,8 +189,11 @@ body {
           </div> -->
         </div>
         <div class="chatroom_section chatroom_form">
-                <!-- <input type="text" class="chatroom_form_inputbox" placeholder="Enter Message">
-                <button type="submit" class="chatroom_form_sendBtn">Send</button> -->
+                <!-- <input type="text" class="chatroom_form_inputbox" placeholder="Enter Message">-->
+                <!-- <button type="submit" class="chatroom_form_buyBtn"></button> -->
+                <div class="buyButton">
+
+                </div>
                 <button type="submit" class="chatroom_form_exitBtn">Exit</button>
         </div>
     </div>
@@ -199,6 +202,10 @@ body {
     integrity="sha512-Jr0UIR/Q8MUX+93zjDOhuDUKLqJZObtwpkLJQcR9qMaLgL0thet39IORuavUaZFkZ8a4ktrUsKPM9mf5LWMduA=="
     crossorigin="anonymous"></script>
 <script>
+    //Data through server !
+    let name = `<%=name%>`;
+    let email = `<%=email%>`;
+
     // Get url parameters
     const url_string = window.location.href;
     const url = new URL(url_string);
@@ -212,13 +219,13 @@ body {
 
     const header = document.querySelector(".chatroom_header_name");
     const exitButton = document.querySelector(".chatroom_form_exitBtn");
+    const buyButton = document.querySelector(".buyButton");
     const matches = document.querySelector(".chatroom_history_list");
     header.innerText = group_name;
 
 
     // // Take controls of input box and button
-
-    const name = prompt("What's your name ?");
+    // const name = prompt("What's your name ?");
 
     //Initialise connection using socket.io
     const socket = io();
@@ -229,16 +236,6 @@ body {
 
         let html = "";
         data.list.forEach((element) => {
-            // html += `<article>
-            //         <div class="text">
-            //             <h3><i class="fa fa-user" aria-hidden="true"></i>
-            //                 ${element.homeTeam} X ${element.awayTeam}
-            //             </h3>
-            //             <br/>
-            //             <a href="#"><button>Create Team</button></a>
-            //         </div>
-            //     </article>`;
-
             html += `<li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey">${element.homeTeam} X ${element.awayTeam} <button style="cursor:pointer">Create</button></li>`;
         });
 
@@ -254,8 +251,15 @@ body {
     socket.emit("join", {
         id: id,
         group_name: group_name,
-        name: name
+        name: name,
+        email : email
     });
+
+    socket.on("adminstatus",(data)=>{
+      if(data.status){
+        buyButton.innerHTML = `<a href="/pay"><button type="submit" class="chatroom_form_buyBtn">Pay</button></a>`;
+      }
+    })
 
 
     socket.on("enter", function (data) {
@@ -266,6 +270,7 @@ body {
 
         alert(`${data.message}`);
     });
+
 
     exitButton.addEventListener("click",()=>{
       socket.emit("close", {

@@ -22,6 +22,8 @@ app.use(session({
 
 // Import Tables
 const User = require("./tables/User");
+const Club = require("./tables/Clubs");
+const { query } = require("express");
 
 // Database Connection !
 mongo.connect(dbkey)
@@ -83,6 +85,7 @@ app.post("/postregister",(request,response)=>{
                         console.log("User registered successfully !");
 
                         // Store Sessions !
+                        request.session.name = user.name;
                         request.session.email = user.email;
                         request.session.contact = user.contact;
 
@@ -113,6 +116,7 @@ app.post("/postlogin",(request,response)=>{
                 if(user.password === password){
 
                     // Store Sessions !
+                    request.session.name = user.name;
                     request.session.email = user.email;
                     request.session.contact = user.contact;
 
@@ -152,13 +156,17 @@ app.get("/createRoom",unauthenticated,(request,response)=>{
 })
 
 app.get("/chat",unauthenticated,(request,response)=>{
-    response.render("chatroom");
+    const {name,email} = request.session;
+
+    //email, club owner name !
+    response.render("chatroom",{name,email});
 })
 
 app.get("/logout", unauthenticated, (request, response) => {
     request.session.destroy(function (err) {
         // cannot access session here
         response.redirect("/login")
+
     });
 })
 
@@ -283,10 +291,6 @@ io.on("connection",function(client){
             }
         })
 
-        // ws.send(JSON.stringify({
-        //     list : matchesList
-        // }))
-
         client.emit("matches",{
             list : matchesList
         })
@@ -296,48 +300,139 @@ io.on("connection",function(client){
 
     // Send connection message to server
     client.on("join",function(data){
-        console.log(data);
+        // console.log(data);
 
         // Collect all information from data
 
-        const { id, group_name, name} = data;
+        const { id, group_name, name, email} = data;
 
         // Search for room index in rooms array
-        const getIndex = rooms.findIndex((room)=>room.id === id);
-        console.log(getIndex);
+        const getIndex = rooms.
+        findIndex((room)=>room.id === id);
+        // console.log(getIndex);
 
-        if(getIndex >= 0){
-            // // Push name of the client into names array !
-            let status = "Participant";
-            const room = pushNames(getIndex,name,client.id,status);
+        //First check whether club exists or not !
+        Club.findOne({club_id : id})
+            .then((club)=>{
+                if(club){  //Club exists !
+                    // Check whether it is our admin or new participant ! 
+                    if(club.admin_email != email){//That this are our new participants
+                          // // Push name of the client into names array !
+                            let status = "Participant";
+                            const room = pushNames(getIndex,name,client.id,status);
 
-            client.join(room.id);
+                            client.join(room.id);
+                            
+                            client.to(room.id).emit("enter",{
+                                message : `${name} entered the chat !`,
+                                time : new Date().toLocaleTimeString()
+                            });
+
+                            io.to(room.id).emit("room",{
+                                title: group_name,
+                                names : room.names
+                            });
+
+                            console.log("ROOMS: ");
+                            console.log(rooms[getIndex].names);
+                    }else{
+                        let status = "Admin";
+                        // const room = pushNames(getIndex,name,client.id,status);
+
+                        if(getIndex < 0){
+                            let room = pushRoom(id,group_name,name,client.id,status);
+                        }else{
+                            const statusIndex = rooms[getIndex].names.findIndex(user=>user.status === "Admin");
+
+                            if(statusIndex < 0) pushNames(getIndex,name,client.id,status);
+                        }
+
+                        client.join(id);
+
+                        // emit admin status !
+                        client.emit("adminstatus",{status : true});
+                    }
+
+
+                  
+                }else{  //New club in formation!
+                    let status = "Admin";
+                            const AdminObj = {
+                                club_id : id,
+                                club_name : group_name,
+                                club_admin : name,
+                                admin_email : email,
+                                club_creationDate : new Date().toLocaleTimeString(),
+                                club_adminCoin : 0   
+                            }
+
+                            new Club(AdminObj).save()
+                                .then(()=>{
+                                    console.log("Club saved in database...");
+                                })
+                                .catch(err=>console.log("Error: ",err));
+
+
+                                const room = pushRoom(id,group_name,name,client.id,status);
+
+                                client.join(room.id);
+                                // emit admin status !
+                                client.emit("adminstatus",{status : true});
+
+                                console.log("ROOMS: ");
+                                console.log(rooms);
+                }
+            })
+            .catch(err=>console.log("Error: ",err));
+
+        // if(getIndex >= 0){
+        //     // Check whether it is our admin or new participant ! 
+        //     // // Push name of the client into names array !
+        //     let status = "Participant";
+        //     const room = pushNames(getIndex,name,client.id,status);
+
+        //     client.join(room.id);
             
-            client.to(room.id).emit("enter",{
-                message : `${name} entered the chat !`,
-                time : new Date().toLocaleTimeString()
-            });
+        //     client.to(room.id).emit("enter",{
+        //         message : `${name} entered the chat !`,
+        //         time : new Date().toLocaleTimeString()
+        //     });
 
-            io.to(room.id).emit("room",{
-                title: group_name,
-                names : room.names
-            });
+        //     io.to(room.id).emit("room",{
+        //         title: group_name,
+        //         names : room.names
+        //     });
 
-        }else{
-            // // Create object
+        // }else{
+        //     // // Create object
 
-            let status = "Admin";
+        //     // Here I have to query database to store club rooms!
+        //     const AdminObj = {
+        //         club_id : id,
+        //         club_name : group_name,
+        //         club_admin : name,
+        //         admin_email : email,
+        //         club_creationDate : new Date().toLocaleTimeString(),
+        //         club_adminCoin : 0   
+        //     }
 
-            const room = pushRoom(id,group_name,name,client.id,status);
+        //     new Club(AdminObj).save()
+        //         .then(()=>{
+        //             console.log("Club saved in database...");
+        //         })
+        //         .catch(err=>console.log("Error: ",err));
 
-            client.join(room.id);
 
-            io.to(room.id).emit("room",{
-                title: group_name,
-                names : room.names,
-                message : "leave"
-            });
-        }
+        //     // const room = pushRoom(id,group_name,name,client.id,status);
+
+        //     client.join(id);
+
+        //     // io.to(room.id).emit("room",{
+        //     //     title: group_name,
+        //     //     names : room.names,
+        //     //     message : "leave"
+        //     // });
+        // }
 
     });
 
@@ -387,6 +482,8 @@ io.on("connection",function(client){
         if(room === undefined){
             return -1;
         }
+        console.log("NAMES: ");
+        console.log(room.names);
 
         io.to(id).emit("room",{
             names : room.names,

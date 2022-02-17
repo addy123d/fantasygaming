@@ -109,9 +109,13 @@ button:hover {
                     </div>
 
                     <div class="btn">
-                        <button>Create</button>
+                        <button>Create Club</button>
                     </div>
         </form>
+
+        <div class="btn">
+            <button class="joinbtn">Join Club</button>
+        </div>
     </div>
     <!-- Link production ! -->
     <input type="text" id="url" readonly>
@@ -124,6 +128,8 @@ button:hover {
 </body>
 <!-- <script src="/js/generateid.js"></script> -->
 <script>
+
+    const joinClub_button = document.querySelector(".joinbtn");
     
    // Generate Unique ID 
    const unique_id = document.getElementById("unique_id");
@@ -168,5 +174,28 @@ button:hover {
             notify.style.display = "none";
         }, 1000);
     });
+
+
+    joinClub_button.addEventListener("click",(e)=>{
+
+        e.preventDefault();
+        console.log("click!");
+
+        let id = prompt("Enter Group ID: ");
+        let group_name = prompt("Enter Group Name: ");
+        console.log("ID: ");
+        console.log(id);
+        console.log("Group Name: ");
+        console.log(group_name);
+
+        if(id!=null && group_name!=null){
+            //Redirect to chat page !
+            location.href = `${location.origin}/chat?title=${group_name}&id=${id}`;
+        }
+
+        // console.log(`URL: ${location.origin}/chat?title=${group_name}&id=${id}`);
+
+
+    })
 </script>
 </html>
