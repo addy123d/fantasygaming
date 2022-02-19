@@ -334,7 +334,7 @@
     <div class="chatroom_section chatroom_form stylebutton">
       <!-- <input type="text" class="chatroom_form_inputbox" placeholder="Enter Message">-->
       <!-- <button type="submit" class="chatroom_form_buyBtn"></button> -->
-      <a href="#" class="buyButton"></a>
+      <a class="buyButton"></a>
       <button type="submit" class="chatroom_form_exitBtn"><i class="fa fa-sign-out" aria-hidden="true"></i> Exit</button>
     </div>
   </div>
@@ -345,7 +345,7 @@
         <h3>Available Coins</h3>
       </div>
       <div class="coinscount">
-        <p>26,001</p>
+        <p>0</p>
       </div>
     </div>
   </div>
@@ -358,6 +358,7 @@
   //Data through server !
   let name = `<%=name%>`;
   let email = `<%=email%>`;
+  let coins = `<%=coins%>`;
 
   // Get url parameters
   const url_string = window.location.href;
@@ -374,7 +375,10 @@
   const exitButton = document.querySelector(".chatroom_form_exitBtn");
   const buyButton = document.querySelector(".buyButton");
   const matches = document.querySelector(".chatroom_history_list");
+  const coinCount = document.querySelector(".coinscount");
   header.innerHTML = `<i class="fa fa-home" aria-hidden="true"></i> ${group_name}`;
+  coinCount.innerHTML = `<p>${coins}</p>`;
+
 
 
   // // Take controls of input box and button
@@ -399,6 +403,15 @@
   socket.on("join", function (data) {
     console.log(data.message);
   });
+
+  socket.emit("coinstatus",{
+    id : id,
+    coins : coins
+  })
+
+  socket.on("coins",(data)=>{
+    coinCount.innerHTML = `<p>${data.coins}</p>`;
+  })
 
   // Send credentials to server !
   socket.emit("join", {
@@ -490,6 +503,16 @@
   socket.on("room", function (data) {
     console.log(data);
   });
+
+
+  // Buy Button logic
+
+  buyButton.addEventListener("click",()=>{
+    let coins = Number(prompt("How many coins?"));
+
+    let redirect_url = `http://localhost:3000/pay?number_coins=${coins}&title=${group_name}&id=${id}`;
+    location.href = redirect_url;
+  })
 </script>
 
 </html>

@@ -1,13 +1,20 @@
 const express = require("express");
 const mongo = require("mongoose");
 const session = require("express-session");
+const Insta = require('instamojo-nodejs');
 const socket = require("socket.io");
 const dbkey = require("./setup/config").url;
 const websocket = require("ws");
 const ejs = require("ejs");
 const matches = require("./utils/matches.json");
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 const host = "127.0.0.1";
+
+const API_KEY = '';
+const AUTH_KEY = '';
+
+Insta.setKeys(API_KEY, AUTH_KEY);
+Insta.isSandboxMode(true);
 
 let app = express();
 
@@ -23,7 +30,7 @@ app.use(session({
 // Import Tables
 const User = require("./tables/User");
 const Club = require("./tables/Clubs");
-const { query } = require("express");
+const { query, request } = require("express");
 
 // Database Connection !
 mongo.connect(dbkey)
@@ -157,9 +164,92 @@ app.get("/createRoom",unauthenticated,(request,response)=>{
 
 app.get("/chat",unauthenticated,(request,response)=>{
     const {name,email} = request.session;
+    console.log(request.query.id);
 
-    //email, club owner name !
-    response.render("chatroom",{name,email});
+    Club.findOne({club_id : request.query.id})
+        .then((club)=>{
+            let coins;
+            if(club){
+                coins = club.club_adminCoin;
+                response.render("chatroom",{name,email,coins});
+            }else{
+                coins = 0;
+                response.render("chatroom",{name,email,coins});
+            }
+        })
+        .catch(err=>console.log("Error: ",err));
+})
+
+// Payment gateway integration
+app.get("/pay",unauthenticated,(req,res)=>{
+
+    let {number_coins,title,id} = req.query;
+
+    let finalCost = Number(number_coins*50);
+
+    // let REDIRECT_URL = `http://localhost:3000/chat?title=${title}&id=${id}`;
+    let REDIRECT_URL = `http://localhost:3000/success?title=${title}&id=${id}&coins=${number_coins}`;
+
+    let data = new Insta.PaymentData();
+    data.purpose = "Purchase Coins";            // REQUIRED
+    data.amount = finalCost;                  // REQUIRED
+    data.currency                = 'INR';
+    data.buyer_name              = req.session.name;
+    data.email                   = req.session.email;
+    data.setRedirectUrl(REDIRECT_URL);
+    
+    Insta.createPayment(data, function(error, response) {
+    if (error) {
+        // some error
+    } else {
+        // Payment redirection link at response.payment_request.longurl
+        console.log(response);
+        const parsed_response = JSON.parse(response);
+
+
+        res.redirect(parsed_response.payment_request.longurl);
+    }
+    });
+})
+
+app.get("/success",unauthenticated,(req,res)=>{
+    console.log("Payment ID : ", req.query.payment_id);
+    console.log("Payment Request ID : ", req.query.payment_request_id);
+
+    // Update database !
+    Insta.getPaymentDetails(req.query.payment_request_id, req.query.payment_id, function (error, response) {
+        if (error) {
+          // Some error
+          console.log("Something went wrong !");
+    
+        } else {
+          console.log(response);
+          if (response.payment_request.payment.status === "Credit") {
+              Club.updateOne({
+                club_id : req.query.id
+              },
+              {
+                $set : {club_adminCoin : req.query.coins}
+              },
+              {
+                $new : true
+              })
+              .then(()=>{
+                //   Coin Updated successfully !
+                // http://localhost:3000/chat?title=${title}&id=${id}
+                console.log("Coin Updated Successfully !");
+                res.redirect(`http://localhost:3000/chat?title=${req.query.title}&id=${req.query.id}`);
+              })
+              .catch(err=>console.log("Error: ",err));
+          }else{
+            // Payment Failed ! (From Bank)
+            res.send("Payment Failed !");
+          }
+        }
+    });
+
+    // res.redirect(`http://localhost:3000/chat?title=${req.query.title}&id=${req.query.id}`);
+
 })
 
 app.get("/logout", unauthenticated, (request, response) => {
@@ -297,6 +387,12 @@ io.on("connection",function(client){
 
 
     }, 5000);
+
+    client.on("coinstatus",(data)=>{
+        io.to(data.id).emit("coins",{
+            coins : data.coins
+        })
+    });
 
     // Send connection message to server
     client.on("join",function(data){
