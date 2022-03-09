@@ -26,7 +26,35 @@ const clubSchema = new schema({
     club_adminCoin : {
         type : Number,
         required : true
-    }
+    },
+    participants : [{
+        name : {
+            type : String
+        },
+        status : {
+            type : String
+        },
+        id : {
+            type  :String
+        }
+    }],
+    club_matches : [{
+        homeTeam : {
+            type: String
+        },
+        awayTeam : {
+            type: String
+        },
+        matchDate : {
+            type: String
+        },
+        entryPoint : {
+            type : String
+        },
+        rewardPoint : {
+            type : String
+        }
+    }]
 })
 
 module.exports = Club = mongo.model("clubs",clubSchema);

@@ -6,6 +6,10 @@ const userSchema = new schema({
         type : String,
         required: true
     },
+    coins : {
+        type: Number,
+        required: true
+    },
     email : {
         type : String,
         required : true

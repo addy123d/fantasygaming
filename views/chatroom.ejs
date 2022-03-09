@@ -8,7 +8,9 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Josefin+Sans&family=Poppins:wght@300&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron&family=Josefin+Sans&family=Poppins:wght@300&display=swap"
+    rel="stylesheet">
 
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
@@ -32,7 +34,7 @@
 
   body {
     background: #f1f5f3;
-    font-family: 'Poppins',sans-serif;
+    font-family: 'Poppins', sans-serif;
   }
 
   .chatroom {
@@ -173,16 +175,17 @@
   }
 
   /* Button Styling */
-  .stylebutton{
+  .stylebutton {
     display: flex;
     justify-content: center;
     align-items: center;
   }
-  .stylebutton> button{
+
+  .stylebutton>button {
     margin: 2%;
   }
 
-  a{
+  a {
     text-decoration: none;
   }
 
@@ -212,7 +215,7 @@
     transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
   }
 
-  button:hover{
+  button:hover {
     background: #1f141b;
   }
 
@@ -224,7 +227,7 @@
     transform: translateX(7px);
   }
 
-  .coins{
+  .coins {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -233,7 +236,7 @@
     margin: 3%;
   }
 
-  .coinBox{
+  .coinBox {
     background: #4e0b54;
     color: #fff;
     padding: 5px 40px;
@@ -242,23 +245,23 @@
     font-size: .8rem;
   }
 
-  .coinBox>div{
+  .coinBox>div {
     display: flex;
     justify-content: center;
   }
 
-  .cointext h3{
+  .cointext h3 {
     text-transform: uppercase;
     letter-spacing: 1px;
   }
 
-  .coinscount p{
+  .coinscount p {
     font-size: 1.4rem;
     font-family: 'Orbitron', sans-serif;
   }
 
   /* Matches List */
-  .matchList{
+  .matchList {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -269,7 +272,7 @@
     left: 0;
   }
 
-  .matches{
+  .matches {
     position: relative;
     top: 0;
     left: 0;
@@ -278,11 +281,11 @@
     border-radius: 50px;
   }
 
-  .matches a{
+  .matches a {
     position: absolute;
     top: 50%;
     left: 80%;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
     background: #f1f5f3;
     color: #1c1d1e;
     padding: .4em .6em;
@@ -294,7 +297,7 @@
     transition: all .4s;
   }
 
-  .matches a:hover{
+  .matches a:hover {
     background: rgb(218, 218, 218);
   }
 
@@ -310,21 +313,84 @@
       background: rgba(139, 139, 139, 0);
     }
   }
+
+  /* For participant display */
+  .show {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+    width: 150px;
+    background: #ffffff;
+    cursor: pointer;
+    color: #000000;
+    font-family: 'Josefin Sans', sans-serif;
+    font-weight: bold;
+    border-radius: 30px;
+  }
+
+  .members {
+    position: absolute;
+    top: 15%;
+    left: 80%;
+  }
+
+  .members ul {
+    list-style: none;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .members ul li {
+    margin-top: 6%;
+    padding: 10px 30px;
+    background: #ffffff;
+    color: #000000;
+    text-align: center;
+    font-family: 'Josefin Sans', sans-serif;
+    font-weight: bold;
+  }
+
+  .members ul li i {
+    position: absolute;
+    left: 89%;
+    color: rgb(66, 248, 66);
+  }
+
+  .show:hover~ul {
+    transition: all .7s;
+    opacity: 1;
+  }
 </style>
 
 <body>
+  <div class="members">
+    <div class="show">Participants</div>
+    <ul id="list">
+
+      <%for(let i = 0; i < participants.length; i++){%>
+        <li><%=participants[i].name%> <i class="fa fa-circle" aria-hidden="true"></i></li>
+        <%}%>
+      <!-- List will be dependent on javascript ! -->
+      <!-- <li>Aditya <i class="fa fa-circle" aria-hidden="true"></i></li>
+        <li>Joe <i class="fa fa-circle" aria-hidden="true"></i></li>
+        <li>John <i class="fa fa-circle" aria-hidden="true"></i></li>
+        <li>Doe <i class="fa fa-circle" aria-hidden="true"></i></li> -->
+    </ul>
+  </div>
   <div class="chatroom">
     <div class="chatroom_section chatroom_header">
       <div class="chatroom_section chatroom_header_name">Kitty</div>
     </div>
     <div class="chatroom_section chatroom_history">
       <ul class="chatroom_history_list matchList">
-        <!-- <li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey">Lorem ipsum dolor sit amet.</li>
-                    <li class="chatroom_history_list_item chatroom_history_list_right chatroom_history_list_item--blue">consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</li> -->
-        <!-- <li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</li>
-                    <li class="chatroom_history_list_item chatroom_history_list_right chatroom_history_list_item--blue">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur</li>
-                    <li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey">Excepteur sint occaecat cupidatat non proident</li>
-                    <li class="chatroom_history_list_item chatroom_history_list_right chatroom_history_list_item--blue">sunt in culpa qui officia deserunt mollit anim id est laborum</li> -->
+        <%if(status==="participant" ){%>
+          <%for(let i=0; i < matches.length; i++){%>
+            <li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey matches">
+              <%=matches[i].homeTeam%> X <%=matches[i].awayTeam%> <a href="/play" style="cursor:pointer">Play</a>
+            </li>
+            <%}%>
+              <%}%>
       </ul>
       <!-- <div class="chatroom_history_entering">
             <div class="chatroom_history_entering_spinner"></div>
@@ -335,7 +401,8 @@
       <!-- <input type="text" class="chatroom_form_inputbox" placeholder="Enter Message">-->
       <!-- <button type="submit" class="chatroom_form_buyBtn"></button> -->
       <a class="buyButton"></a>
-      <button type="submit" class="chatroom_form_exitBtn"><i class="fa fa-sign-out" aria-hidden="true"></i> Exit</button>
+      <button type="submit" class="chatroom_form_exitBtn"><i class="fa fa-sign-out" aria-hidden="true"></i>
+        Exit</button>
     </div>
   </div>
 
@@ -359,6 +426,12 @@
   let name = `<%=name%>`;
   let email = `<%=email%>`;
   let coins = `<%=coins%>`;
+  let status = `<%=status%>`;
+
+  console.log(name);
+  console.log(email);
+  console.log(coins);
+  console.log(status);
 
   // Get url parameters
   const url_string = window.location.href;
@@ -389,14 +462,16 @@
 
   // Matches list !
   socket.on("matches", (data) => {
-    console.log(data);
+    // console.log(data);
 
-    let html = "";
-    data.list.forEach((element) => {
-      html += `<li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey matches">${element.homeTeam} X ${element.awayTeam} <a style="cursor:pointer">Create</a></li>`;
-    });
+    if (status === "admin") {
+      let html = "";
+      data.list.forEach((element) => {
+        html += `<li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey matches">${element.homeTeam} X ${element.awayTeam} <a href="/create?team1=${element.homeTeam}&team2=${element.awayTeam}&id=${id}&name=${group_name}" style="cursor:pointer">Create</a></li>`;
+      });
 
-    matches.innerHTML = html;
+      matches.innerHTML = html;
+    }
   })
 
   //Check whether server has accepted your connection request or not ! if yes then function will execute
@@ -404,12 +479,12 @@
     console.log(data.message);
   });
 
-  socket.emit("coinstatus",{
-    id : id,
-    coins : coins
+  socket.emit("coinstatus", {
+    id: id,
+    coins: coins
   })
 
-  socket.on("coins",(data)=>{
+  socket.on("coins", (data) => {
     coinCount.innerHTML = `<p>${data.coins}</p>`;
   })
 
@@ -426,6 +501,8 @@
       buyButton.innerHTML = `<button>
                               <span>Purchase Coins <i class="fa fa-money" aria-hidden="true"></i></span>
                              </button>`;
+    } else {
+      console.log("Participant");
     }
   })
 
@@ -501,13 +578,23 @@
 
   // Room Information !
   socket.on("room", function (data) {
+    console.log("Room Data: ");
     console.log(data);
+
+    const { names } = data;
+
+      let html = "";
+      names.forEach(element => {
+        html += `<li>${element.name} <i class="fa fa-circle" aria-hidden="true"></i></li>`;
+      });
+
+      document.querySelector("#list").innerHTML = html;
   });
 
 
   // Buy Button logic
 
-  buyButton.addEventListener("click",()=>{
+  buyButton.addEventListener("click", () => {
     let coins = Number(prompt("How many coins?"));
 
     let redirect_url = `http://localhost:3000/pay?number_coins=${coins}&title=${group_name}&id=${id}`;

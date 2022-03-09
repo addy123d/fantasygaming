@@ -7,11 +7,11 @@ const dbkey = require("./setup/config").url;
 const websocket = require("ws");
 const ejs = require("ejs");
 const matches = require("./utils/matches.json");
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3000;
 const host = "127.0.0.1";
 
-const API_KEY = '';
-const AUTH_KEY = '';
+const API_KEY = 'test_daff4b449d066d06e79d3e74db9';
+const AUTH_KEY = 'test_5d451fdb1c7d1e640cae8902ea4';
 
 Insta.setKeys(API_KEY, AUTH_KEY);
 Insta.isSandboxMode(true);
@@ -31,18 +31,19 @@ app.use(session({
 const User = require("./tables/User");
 const Club = require("./tables/Clubs");
 const { query, request } = require("express");
+const { response } = require("express");
 
 // Database Connection !
 mongo.connect(dbkey)
-    .then(()=>{
+    .then(() => {
         console.log("Database Connected Successfully !");
     })
-    .catch(err=>console.log("Error: ",err));
+    .catch(err => console.log("Error: ", err));
 
-app.use(express.static(__dirname+"/client"));
-app.set("view engine","ejs");
+app.use(express.static(__dirname + "/client"));
+app.set("view engine", "ejs");
 app.use(express.json());
-app.use(express.urlencoded({"extended":false}));
+app.use(express.urlencoded({ "extended": false }));
 
 function unauthenticated(request, response, next) {
     console.log(request.session);
@@ -64,31 +65,37 @@ function authenticated(request, response, next) {
 
 const rooms = [];
 
-app.get("/",(request,response)=>{
+app.get("/", (request, response) => {
     let sessionStatus = false;
 
-    if(request.session.email != undefined) sessionStatus = true;
+    if (request.session.email != undefined) sessionStatus = true;
 
-    response.render("index",{sessionStatus});
+    response.render("index", { sessionStatus });
 })
 
 // Auth Routes
-app.post("/postregister",(request,response)=>{
+app.post("/postregister", (request, response) => {
     console.log(request.body);
 
-    const {name,email,contact,password} = request.body;
+    const { name, email, contact, password } = request.body;
 
-    User.findOne({email : email})
-        .then((user)=>{
-            if(user){
+    User.findOne({ email: email })
+        .then((user) => {
+            if (user) {
                 response.status(503).json({
-                    responseCode : 503
+                    responseCode: 503
                 })
-            }else{
-                let userObject = {name,email,contact,password};
+            } else {
+                let userObject = {
+                    name: name,
+                    coins: 0,
+                    email: email,
+                    contact: contact,
+                    password: password
+                }
 
                 new User(userObject).save()
-                    .then((user)=>{
+                    .then((user) => {
                         console.log("User registered successfully !");
 
                         // Store Sessions !
@@ -97,30 +104,30 @@ app.post("/postregister",(request,response)=>{
                         request.session.contact = user.contact;
 
                         response.status(200).json({
-                            responseCode : 200
+                            responseCode: 200
                         })
                     })
-                    .catch(err=>console.log("Error: ",err));
+                    .catch(err => console.log("Error: ", err));
             }
         })
-        .catch((err)=>{
-            console.log("Error: ",err);
+        .catch((err) => {
+            console.log("Error: ", err);
             response.status(503).json({
-                responseCode : 503
+                responseCode: 503
             })
         });
 
 })
 
-app.post("/postlogin",(request,response)=>{
+app.post("/postlogin", (request, response) => {
     console.log(request.body);
 
-    const {email,password} = request.body;
+    const { email, password } = request.body;
 
-    User.findOne({email : email})
-        .then((user)=>{
-            if(user){
-                if(user.password === password){
+    User.findOne({ email: email })
+        .then((user) => {
+            if (user) {
+                if (user.password === password) {
 
                     // Store Sessions !
                     request.session.name = user.name;
@@ -128,129 +135,200 @@ app.post("/postlogin",(request,response)=>{
                     request.session.contact = user.contact;
 
                     response.status(200).json({
-                        responseCode : 200
+                        responseCode: 200
                     })
 
-                }else{
+                } else {
                     response.status(503).json({
-                        responseCode : 503
+                        responseCode: 503
                     })
                 }
-            }else{
+            } else {
                 response.status(503).json({
-                    responseCode : 503
+                    responseCode: 503
                 })
             }
         })
-        .catch((err)=>{
-            console.log("Error: ",err);
+        .catch((err) => {
+            console.log("Error: ", err);
             response.status(503).json({
-                responseCode : 503
+                responseCode: 503
             })
         });
 })
 
-app.get("/register",authenticated,(request,response)=>{
+app.get("/register", authenticated, (request, response) => {
     response.render("register");
 })
 
-app.get("/login",authenticated,(request,response)=>{
+app.get("/login", authenticated, (request, response) => {
     response.render("login");
 })
 
-app.get("/createRoom",unauthenticated,(request,response)=>{
+app.get("/createRoom", unauthenticated, (request, response) => {
     response.render("room.ejs");
 })
 
-app.get("/chat",unauthenticated,(request,response)=>{
-    const {name,email} = request.session;
+app.get("/chat", unauthenticated, (request, response) => {
+    let status = "";
+    let matches,participants;
+    const { name, email } = request.session;
     console.log(request.query.id);
 
-    Club.findOne({club_id : request.query.id})
-        .then((club)=>{
+    Club.findOne({ club_id: request.query.id })
+        .then((club) => {
             let coins;
-            if(club){
+            if (club) {
+
+                matches = club.club_matches;
+                participants = club.participants;
+                console.log("PARTICIPANTS: ");
+                console.log(participants);
+                // Check whether this person is admin or not !
+                if (club.admin_email === email) {
+                    status = "admin";
+                } else {
+                    status = "participant";
+                }
+
+
                 coins = club.club_adminCoin;
-                response.render("chatroom",{name,email,coins});
-            }else{
+                response.render("chatroom", { name, email, coins, status, matches,participants });
+            } else {
+                matches = [];
+                participants = [];
+                status = "admin";
                 coins = 0;
-                response.render("chatroom",{name,email,coins});
+                response.render("chatroom", { name, email, coins, status, matches, participants });
             }
         })
-        .catch(err=>console.log("Error: ",err));
+        .catch(err => console.log("Error: ", err));
 })
 
 // Payment gateway integration
-app.get("/pay",unauthenticated,(req,res)=>{
+app.get("/pay", unauthenticated, (req, res) => {
 
-    let {number_coins,title,id} = req.query;
+    let { number_coins, title, id } = req.query;
 
-    let finalCost = Number(number_coins*50);
+    let finalCost = Number(number_coins * 50);
 
-    // let REDIRECT_URL = `http://localhost:3000/chat?title=${title}&id=${id}`;
     let REDIRECT_URL = `http://localhost:3000/success?title=${title}&id=${id}&coins=${number_coins}`;
 
     let data = new Insta.PaymentData();
     data.purpose = "Purchase Coins";            // REQUIRED
     data.amount = finalCost;                  // REQUIRED
-    data.currency                = 'INR';
-    data.buyer_name              = req.session.name;
-    data.email                   = req.session.email;
+    data.currency = 'INR';
+    data.buyer_name = req.session.name;
+    data.email = req.session.email;
     data.setRedirectUrl(REDIRECT_URL);
-    
-    Insta.createPayment(data, function(error, response) {
-    if (error) {
-        // some error
-    } else {
-        // Payment redirection link at response.payment_request.longurl
-        console.log(response);
-        const parsed_response = JSON.parse(response);
+
+    Insta.createPayment(data, function (error, response) {
+        if (error) {
+            // some error
+        } else {
+            // Payment redirection link at response.payment_request.longurl
+            console.log(response);
+            const parsed_response = JSON.parse(response);
 
 
-        res.redirect(parsed_response.payment_request.longurl);
-    }
+            res.redirect(parsed_response.payment_request.longurl);
+        }
     });
 })
 
-app.get("/success",unauthenticated,(req,res)=>{
+app.get("/success", unauthenticated, (req, res) => {
     console.log("Payment ID : ", req.query.payment_id);
     console.log("Payment Request ID : ", req.query.payment_request_id);
 
     // Update database !
     Insta.getPaymentDetails(req.query.payment_request_id, req.query.payment_id, function (error, response) {
         if (error) {
-          // Some error
-          console.log("Something went wrong !");
-    
+            // Some error
+            console.log("Something went wrong !");
+
         } else {
-          console.log(response);
-          if (response.payment_request.payment.status === "Credit") {
-              Club.updateOne({
-                club_id : req.query.id
-              },
-              {
-                $set : {club_adminCoin : req.query.coins}
-              },
-              {
-                $new : true
-              })
-              .then(()=>{
-                //   Coin Updated successfully !
-                // http://localhost:3000/chat?title=${title}&id=${id}
-                console.log("Coin Updated Successfully !");
-                res.redirect(`http://localhost:3000/chat?title=${req.query.title}&id=${req.query.id}`);
-              })
-              .catch(err=>console.log("Error: ",err));
-          }else{
-            // Payment Failed ! (From Bank)
-            res.send("Payment Failed !");
-          }
+            console.log(response);
+            if (response.payment_request.payment.status === "Credit") {
+                Club.updateOne({
+                    club_id: req.query.id
+                },
+                    {
+                        $set: { club_adminCoin: req.query.coins }
+                    },
+                    {
+                        $new: true
+                    })
+                    .then(() => {
+                        //   Coin Updated successfully !
+                        // http://localhost:3000/chat?title=${title}&id=${id}
+                        console.log("Coin Updated Successfully !");
+                        res.redirect(`http://localhost:3000/chat?title=${req.query.title}&id=${req.query.id}`);
+                    })
+                    .catch(err => console.log("Error: ", err));
+            } else {
+                // Payment Failed ! (From Bank)
+                res.send("Payment Failed !");
+            }
         }
     });
 
     // res.redirect(`http://localhost:3000/chat?title=${req.query.title}&id=${req.query.id}`);
 
 })
+
+// Create Match !
+app.get("/create", unauthenticated, (request, response) => {
+    const { team1, team2, id, name } = request.query;
+
+    response.render("createMatch", { home: team1, away: team2, id: id, name: name });
+})
+
+app.post("/createMatch", unauthenticated, (request, response) => {
+
+    const { homeTeam, awayTeam, entryPoints, rewardPoints, id, name } = request.body;
+    console.log(id);
+
+    // Check whether admin has coins equal to greater than entry coins !
+    Club.findOne({ club_id: id })
+        .then((club) => {
+            console.log(club);
+            if (club.club_adminCoin >= Number(entryPoints)) {
+                // Proceed Further
+                // Create Match for participants, updates club table
+                Club.updateOne({
+                    club_id: id
+                }, {
+                    $push: {
+                        club_matches: {
+                            homeTeam: homeTeam,
+                            awayTeam: awayTeam,
+                            matchDate: new Date().toLocaleTimeString(),
+                            entryPoint: entryPoints,
+                            rewardPoint: rewardPoints
+                        }
+                    }
+                }, {
+                    $new: true
+                })
+                    .then(() => {
+                        console.log("Match Created Successfully !");
+                        response.json({
+                            id: id,
+                            name: name,
+                            message: "Match Created Successfully !",
+                            responseCode: 200
+                        })
+                    })
+                    .catch(err => console.log("Error: ", err));
+            } else {
+                response.json({
+                    message: "Less Coins"
+                })
+            }
+        })
+        .catch(err => console.log("Error: ", err));
+
+});
 
 app.get("/logout", unauthenticated, (request, response) => {
     request.session.destroy(function (err) {
@@ -260,7 +338,7 @@ app.get("/logout", unauthenticated, (request, response) => {
     });
 })
 
-const httpServer = app.listen(port,host,()=>{
+const httpServer = app.listen(port, host, () => {
     console.log("Server is running...");
 })
 
@@ -311,280 +389,250 @@ function getTime() {
 
 
 // Functions
-function pushRoom(id,group_name,name,socket_id,status){
+function pushRoom(id, group_name, name, socket_id, status) {
     //Push room to the rooms array !
     // Create object
     const room = {
-        id,group_name, names:[{ name : name, client_id: socket_id,status:status}]
+        id, group_name, names: [{ name: name, client_id: socket_id, status: status }]
     };
 
     // // Push this room into the rooms arrays
     rooms.push(room);
 
-    console.log("Rooms :",rooms);
+    console.log("Rooms :", rooms);
 
     return room;
 };
 
-function pushNames(index,name,socket_id,status){
- // Push name of the client into names array !
-    rooms[index].names.push({name : name, client_id : socket_id,status:status});
-    console.log("Clients :",rooms[index].names);
+function pushNames(index, name, socket_id, status) {
+    // Push name of the client into names array !
+    rooms[index].names.push({ name: name, client_id: socket_id, status: status });
+    console.log("Clients :", rooms[index].names);
 
-    console.log("Rooms :",rooms);  
+    console.log("Rooms :", rooms);
 
-    return rooms[index];
+    return rooms[index].names;
 };
 
-function userRetrieve(group_id,client_id){
+function userRetrieve(group_id, client_id) {
 
-    const getIndex = rooms.findIndex((room)=>room.id===group_id);
+    const getIndex = rooms.findIndex((room) => room.id === group_id);
 
     try {
-        const userIndex = rooms[getIndex].names.findIndex((name)=>name.client_id === client_id);
+        const userIndex = rooms[getIndex].names.findIndex((name) => name.client_id === client_id);
         return rooms[getIndex].names[userIndex];
     } catch (error) {
-        console.log("Error :",error);
+        console.log("Error :", error);
         return null;
     };
-    
+
 };
 
 
-function deleteUser(group_id,client_id){
-    const room = rooms.find((room)=>room.id === group_id);
+function deleteUser(group_id, client_id) {
+    const room = rooms.find((room) => room.id === group_id);
 
-    if(room === undefined){
+    if (room === undefined) {
         return -1;
     }
 
-    const userIndex = room.names.findIndex((user)=>user.client_id === client_id);
+    const userIndex = room.names.findIndex((user) => user.client_id === client_id);
 
-    if(userIndex != -1){
-        room.names.splice(userIndex,1);
+    if (userIndex != -1) {
+        room.names.splice(userIndex, 1);
     }
 };
 
-io.on("connection",function(client){
+io.on("connection", function (client) {
 
     setInterval(() => {
         let matchesList = [];
 
-        let {month, date } = getTime();
+        let { month, date } = getTime();
 
         // Check whether there are matches on particular date and month !
         // List out particular matches on particular date !
 
-        matches.forEach((match)=>{
-            if(match.month === month && match.date === date){
+        matches.forEach((match) => {
+            if (match.month === month && match.date === date) {
                 matchesList.push(match);
             }
         })
 
-        client.emit("matches",{
-            list : matchesList
+        client.emit("matches", {
+            list: matchesList
         })
 
 
     }, 5000);
 
-    client.on("coinstatus",(data)=>{
-        io.to(data.id).emit("coins",{
-            coins : data.coins
+    client.on("coinstatus", (data) => {
+        io.to(data.id).emit("coins", {
+            coins: data.coins
         })
     });
 
     // Send connection message to server
-    client.on("join",function(data){
+    client.on("join", function (data) {
+        console.log("Hit Join !");
         // console.log(data);
 
         // Collect all information from data
 
-        const { id, group_name, name, email} = data;
+        const { id, group_name, name, email } = data;
 
         // Search for room index in rooms array
-        const getIndex = rooms.
-        findIndex((room)=>room.id === id);
+        const getIndex = rooms.findIndex((room) => room.id === id);
         // console.log(getIndex);
 
         //First check whether club exists or not !
-        Club.findOne({club_id : id})
-            .then((club)=>{
-                if(club){  //Club exists !
+        Club.findOne({ club_id: id })
+            .then((club) => {
+                if (club) {
+
+
+                    //Club exists !
                     // Check whether it is our admin or new participant ! 
-                    if(club.admin_email != email){//That this are our new participants
-                          // // Push name of the client into names array !
-                            let status = "Participant";
-                            const room = pushNames(getIndex,name,client.id,status);
+                    if (club.admin_email != email) {//That this are our new participants
+                        // // Push name of the client into names array !
+                        let status = "participant";
 
-                            client.join(room.id);
-                            
-                            client.to(room.id).emit("enter",{
-                                message : `${name} entered the chat !`,
-                                time : new Date().toLocaleTimeString()
-                            });
+                        Club.updateOne({
+                            club_id: id
+                        }, {
+                            $push: { participants: { name: name,status : status, id: client.id } }
+                        }, {
+                            $new: true
+                        })
+                            .then(() => {
+                                console.log("Participant Added");
 
-                            io.to(room.id).emit("room",{
-                                title: group_name,
-                                names : room.names
-                            });
+                                client.join(id);
 
-                            console.log("ROOMS: ");
-                            console.log(rooms[getIndex].names);
-                    }else{
-                        let status = "Admin";
+                                client.to(id).emit("enter", {
+                                    message: `${name} entered the chat !`,
+                                    time: new Date().toLocaleTimeString()
+                                });
+
+
+
+                            })
+                            .catch(err => console.log("Error: ", err));
+
+
+                    } else {
+                        let status = "admin";
                         // const room = pushNames(getIndex,name,client.id,status);
 
-                        if(getIndex < 0){
-                            let room = pushRoom(id,group_name,name,client.id,status);
-                        }else{
-                            const statusIndex = rooms[getIndex].names.findIndex(user=>user.status === "Admin");
+                        if (getIndex < 0) {
+                            let room = pushRoom(id, group_name, name, client.id, status);
+                        } else {
+                            const statusIndex = rooms[getIndex].names.findIndex(user => user.status === "Admin");
 
-                            if(statusIndex < 0) pushNames(getIndex,name,client.id,status);
+                            if (statusIndex < 0) {
+                                let names = pushNames(getIndex, name, client.id, status);
+
+                            }
                         }
+
 
                         client.join(id);
 
                         // emit admin status !
-                        client.emit("adminstatus",{status : true});
+                        client.emit("adminstatus", { status: true });
+
+
                     }
 
 
-                  
-                }else{  //New club in formation!
-                    let status = "Admin";
-                            const AdminObj = {
-                                club_id : id,
-                                club_name : group_name,
-                                club_admin : name,
-                                admin_email : email,
-                                club_creationDate : new Date().toLocaleTimeString(),
-                                club_adminCoin : 0   
-                            }
-
-                            new Club(AdminObj).save()
-                                .then(()=>{
-                                    console.log("Club saved in database...");
-                                })
-                                .catch(err=>console.log("Error: ",err));
+                    console.log("Club Participants: ");
+                    console.log(club);
 
 
-                                const room = pushRoom(id,group_name,name,client.id,status);
 
-                                client.join(room.id);
-                                // emit admin status !
-                                client.emit("adminstatus",{status : true});
+                } else {  //New club in formation!
+                    let status = "admin";
+                    const AdminObj = {
+                        club_id: id,
+                        club_name: group_name,
+                        club_admin: name,
+                        admin_email: email,
+                        club_creationDate: new Date().toLocaleTimeString(),
+                        club_adminCoin: 0,
+                        participants: [{ name: name, id: client.id, status: status }],
+                        club_matches: []
+                    }
 
-                                console.log("ROOMS: ");
-                                console.log(rooms);
+                    new Club(AdminObj).save()
+                        .then(() => {
+                            console.log("Club saved in database...");
+                        })
+                        .catch(err => console.log("Error: ", err));
+
+
+                    const room = pushRoom(id, group_name, name, client.id, status);
+
+                    client.join(room.id);
+                    // emit admin status !
+                    client.emit("adminstatus", { status: true });
+
+                    console.log("ROOMS: ");
+                    console.log(rooms);
                 }
             })
-            .catch(err=>console.log("Error: ",err));
-
-        // if(getIndex >= 0){
-        //     // Check whether it is our admin or new participant ! 
-        //     // // Push name of the client into names array !
-        //     let status = "Participant";
-        //     const room = pushNames(getIndex,name,client.id,status);
-
-        //     client.join(room.id);
-            
-        //     client.to(room.id).emit("enter",{
-        //         message : `${name} entered the chat !`,
-        //         time : new Date().toLocaleTimeString()
-        //     });
-
-        //     io.to(room.id).emit("room",{
-        //         title: group_name,
-        //         names : room.names
-        //     });
-
-        // }else{
-        //     // // Create object
-
-        //     // Here I have to query database to store club rooms!
-        //     const AdminObj = {
-        //         club_id : id,
-        //         club_name : group_name,
-        //         club_admin : name,
-        //         admin_email : email,
-        //         club_creationDate : new Date().toLocaleTimeString(),
-        //         club_adminCoin : 0   
-        //     }
-
-        //     new Club(AdminObj).save()
-        //         .then(()=>{
-        //             console.log("Club saved in database...");
-        //         })
-        //         .catch(err=>console.log("Error: ",err));
-
-
-        //     // const room = pushRoom(id,group_name,name,client.id,status);
-
-        //     client.join(id);
-
-        //     // io.to(room.id).emit("room",{
-        //     //     title: group_name,
-        //     //     names : room.names,
-        //     //     message : "leave"
-        //     // });
-        // }
-
+            .catch(err => console.log("Error: ", err));
     });
 
 
     // Collect messages from client
-    client.on("message", function(data){
+    client.on("message", function (data) {
 
-        client.to(data.id).emit("server_message",{
-            message : data.message,
-            name : data.name,
-            time : new Date().toLocaleTimeString()
+        client.to(data.id).emit("server_message", {
+            message: data.message,
+            name: data.name,
+            time: new Date().toLocaleTimeString()
         });
     });
 
 
     //Send typing message
-    client.on("typing",function(data){
-        client.to(data.id).emit("server_type_message",{
-            type : data.type,
-            name : data.name
+    client.on("typing", function (data) {
+        client.to(data.id).emit("server_type_message", {
+            type: data.type,
+            name: data.name
         });
     });
 
-    client.on("close", function(data){
-        const {id} = data;
+    client.on("close", function (data) {
+        const { id } = data;
 
-        const user = userRetrieve(id,client.id);
+        const user = userRetrieve(id, client.id);
 
-        console.log("User :",user);
+        console.log("User :", user);
 
-        if(user === null || user== undefined){
-            client.to(id).emit("leave",{
-                message : `${user} has left the chat !`
+        if (user === null || user == undefined) {
+            client.to(id).emit("leave", {
+                message: `${user} has left the chat !`
             });
-        }else{
-            client.to(id).emit("leave",{
-                message : `${user.name} has left the chat !`,
-                time : new Date().toLocaleTimeString()
+        } else {
+            client.to(id).emit("leave", {
+                message: `${user.name} has left the chat !`,
+                time: new Date().toLocaleTimeString()
             });
         }
 
         // Delete user
-        deleteUser(id,client.id);
-
-        const room = rooms.find((room)=>room.id=== id);
-
-        if(room === undefined){
-            return -1;
-        }
-        console.log("NAMES: ");
-        console.log(room.names);
-
-        io.to(id).emit("room",{
-            names : room.names,
-            title: room.group_name
-        });
+        Club.updateOne({
+            club_id: id
+        }, {
+            $pull: { participants: { id: client.id,status : "participant" } }
+        }, {
+            $new: true
+        })
+            .then(() => {
+                console.log("Someone left !");
+            })
+            .catch(err => console.log("Error: ", err));
     });
 
 
