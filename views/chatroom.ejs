@@ -514,6 +514,9 @@
     console.log(data);
 
     alert(`${data.message}`);
+
+    
+    location.reload();
   });
 
 
@@ -581,14 +584,12 @@
     console.log("Room Data: ");
     console.log(data);
 
-    const { names } = data;
+    // const { name } = data;
 
-      let html = "";
-      names.forEach(element => {
-        html += `<li>${element.name} <i class="fa fa-circle" aria-hidden="true"></i></li>`;
-      });
+    //   let html = "";
+    //     html += `<li>${element.name} <i class="fa fa-circle" aria-hidden="true"></i></li>`;
 
-      document.querySelector("#list").innerHTML = html;
+    //   document.querySelector("#list").innerHTML = html;
   });
 
 

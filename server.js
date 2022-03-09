@@ -171,7 +171,7 @@ app.get("/createRoom", unauthenticated, (request, response) => {
 
 app.get("/chat", unauthenticated, (request, response) => {
     let status = "";
-    let matches,participants;
+    let matches,participants=[];
     const { name, email } = request.session;
     console.log(request.query.id);
 
@@ -504,8 +504,14 @@ io.on("connection", function (client) {
                         }, {
                             $new: true
                         })
-                            .then(() => {
+                            .then((update) => {
+                                console.log("Update");
+                                console.log(update);
                                 console.log("Participant Added");
+
+                                io.to(id).emit("room",{
+                                    name : name
+                                })
 
                                 client.join(id);
 
