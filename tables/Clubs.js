@@ -34,11 +34,20 @@ const clubSchema = new schema({
         status : {
             type : String
         },
+        email : {
+            type : String
+        },
+        coins : {
+            type : String
+        },
         id : {
             type  :String
         }
     }],
     club_matches : [{
+        matchId : {
+            type : String
+        },
         homeTeam : {
             type: String
         },

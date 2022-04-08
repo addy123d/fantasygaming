@@ -149,6 +149,8 @@
 
     const group_name = `<%=name%>`;
     const group_id = `<%=id%>`;
+    const date = `<%=date%>`;
+
     console.log("Group ID: ", group_id);
 
     const createMatch_button = document.querySelector("#createButton");
@@ -166,6 +168,7 @@
                 awayTeam: awayTeam.value,
                 entryPoints: entryPoints.value,
                 rewardPoints: rewardPoints.value,
+                date : date,
                 id: group_id,
                 name : group_name
             }),

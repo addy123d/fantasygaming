@@ -2,7 +2,7 @@
     {   
         "matchNum" : "match1",
         "date" : 9,
-        "month" : "march",
+        "month" : "april",
         "homeTeam" : "MI",
         "awayTeam" : "RPS",
         "venue" : "Wankhede Stadium, Mumbai",
@@ -15,7 +15,7 @@
     {   
         "matchNum" : "match2",
         "date" : 9,
-        "month" : "march",
+        "month" : "april",
         "homeTeam" : "KKR",
         "awayTeam" : "DD",
         "venue" : "Eden Gardens, Kolkata",
@@ -28,7 +28,7 @@
     {   
         "matchNum" : "match3",
         "date" : 9,
-        "month" : "march",
+        "month" : "april",
         "homeTeam" : "KXIP",
         "awayTeam" : "GL",
         "venue" : "PCA, Mohali",
@@ -40,8 +40,8 @@
     },
     {   
         "matchNum" : "match4",
-        "date" : 21,
-        "month" : "february",
+        "date" : 9,
+        "month" : "april",
         "homeTeam" : "RCB",
         "awayTeam" : "SH",
         "venue" : "M Chinnaswamy Stadium, Bangalore",

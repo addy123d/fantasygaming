@@ -387,7 +387,7 @@
         <%if(status==="participant" ){%>
           <%for(let i=0; i < matches.length; i++){%>
             <li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey matches">
-              <%=matches[i].homeTeam%> X <%=matches[i].awayTeam%> <a href="/play" style="cursor:pointer">Play</a>
+              <%=matches[i].homeTeam%> X <%=matches[i].awayTeam%> <a href="/play?id=<%=id%>&matchID=<%=matches[i].matchId%>" style="cursor:pointer">Play</a>
             </li>
             <%}%>
               <%}%>
@@ -467,7 +467,7 @@
     if (status === "admin") {
       let html = "";
       data.list.forEach((element) => {
-        html += `<li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey matches">${element.homeTeam} X ${element.awayTeam} <a href="/create?team1=${element.homeTeam}&team2=${element.awayTeam}&id=${id}&name=${group_name}" style="cursor:pointer">Create</a></li>`;
+        html += `<li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey matches">${element.homeTeam} X ${element.awayTeam} <a href="/create?team1=${element.homeTeam}&team2=${element.awayTeam}&id=${id}&name=${group_name}&date=${element.date}" style="cursor:pointer">Create</a></li>`;
       });
 
       matches.innerHTML = html;
@@ -479,10 +479,10 @@
     console.log(data.message);
   });
 
-  socket.emit("coinstatus", {
-    id: id,
-    coins: coins
-  })
+  // socket.emit("coinstatus", {
+  //   id: id,
+  //   coins: coins
+  // })
 
   socket.on("coins", (data) => {
     coinCount.innerHTML = `<p>${data.coins}</p>`;

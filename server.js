@@ -7,6 +7,7 @@ const dbkey = require("./setup/config").url;
 const websocket = require("ws");
 const ejs = require("ejs");
 const matches = require("./utils/matches.json");
+const getTime = require("./utils/getTime");
 const port = process.env.PORT || 3000;
 const host = "127.0.0.1";
 
@@ -171,35 +172,52 @@ app.get("/createRoom", unauthenticated, (request, response) => {
 
 app.get("/chat", unauthenticated, (request, response) => {
     let status = "";
-    let matches,participants=[];
+    let lendbutton = false;
+    let matches, participants = [];
     const { name, email } = request.session;
     console.log(request.query.id);
+    let {id} = request.query;
 
     Club.findOne({ club_id: request.query.id })
         .then((club) => {
             let coins;
             if (club) {
-
                 matches = club.club_matches;
                 participants = club.participants;
                 console.log("PARTICIPANTS: ");
                 console.log(participants);
+
+                // Check for coins !
+                let participantIndex = participants.findIndex(participant => participant.email === email);
+                console.log("Index: ");
+                console.log(participantIndex);
+
                 // Check whether this person is admin or not !
                 if (club.admin_email === email) {
+                    console.log("ADMIN");
                     status = "admin";
+                    coins = club.club_adminCoin;
                 } else {
+                    console.log("PARTICIPANT");
                     status = "participant";
+                    if (participantIndex < 0) {
+                        coins = 0;
+                    } else {
+                        coins = participants[participantIndex].coins;
+                    }
+                    lendbutton = true;
                 }
 
+                console.log("Coins: ");
+                console.log(coins);
 
-                coins = club.club_adminCoin;
-                response.render("chatroom", { name, email, coins, status, matches,participants });
+                response.render("chatroom", { name, email, coins, status, matches, participants, id });
             } else {
                 matches = [];
                 participants = [];
                 status = "admin";
                 coins = 0;
-                response.render("chatroom", { name, email, coins, status, matches, participants });
+                response.render("chatroom", { name, email, coins, status, matches, participants, id });
             }
         })
         .catch(err => console.log("Error: ", err));
@@ -215,8 +233,9 @@ app.get("/pay", unauthenticated, (req, res) => {
     let REDIRECT_URL = `http://localhost:3000/success?title=${title}&id=${id}&coins=${number_coins}`;
 
     let data = new Insta.PaymentData();
-    data.purpose = "Purchase Coins";            // REQUIRED
-    data.amount = finalCost;                  // REQUIRED
+    data.purpose = "Purchase Coins";
+    data.phone = 1234567890;// REQUIRED
+    data.amount = finalCost;// REQUIRED
     data.currency = 'INR';
     data.buyer_name = req.session.name;
     data.email = req.session.email;
@@ -225,8 +244,11 @@ app.get("/pay", unauthenticated, (req, res) => {
     Insta.createPayment(data, function (error, response) {
         if (error) {
             // some error
+            console.log("Error: ");
+            console.log(error);
         } else {
             // Payment redirection link at response.payment_request.longurl
+            console.log("Response: ");
             console.log(response);
             const parsed_response = JSON.parse(response);
 
@@ -247,28 +269,24 @@ app.get("/success", unauthenticated, (req, res) => {
             console.log("Something went wrong !");
 
         } else {
+            console.log("Final Response: ");
             console.log(response);
-            if (response.payment_request.payment.status === "Credit") {
-                Club.updateOne({
-                    club_id: req.query.id
+            Club.updateOne({
+                club_id: req.query.id
+            },
+                {
+                    $set: { club_adminCoin: req.query.coins }
                 },
-                    {
-                        $set: { club_adminCoin: req.query.coins }
-                    },
-                    {
-                        $new: true
-                    })
-                    .then(() => {
-                        //   Coin Updated successfully !
-                        // http://localhost:3000/chat?title=${title}&id=${id}
-                        console.log("Coin Updated Successfully !");
-                        res.redirect(`http://localhost:3000/chat?title=${req.query.title}&id=${req.query.id}`);
-                    })
-                    .catch(err => console.log("Error: ", err));
-            } else {
-                // Payment Failed ! (From Bank)
-                res.send("Payment Failed !");
-            }
+                {
+                    $new: true
+                })
+                .then(() => {
+                    //   Coin Updated successfully !
+                    // http://localhost:3000/chat?title=${title}&id=${id}
+                    console.log("Coin Updated Successfully !");
+                    res.redirect(`http://localhost:3000/chat?title=${req.query.title}&id=${req.query.id}`);
+                })
+                .catch(err => console.log("Error: ", err));
         }
     });
 
@@ -279,13 +297,47 @@ app.get("/success", unauthenticated, (req, res) => {
 // Create Match !
 app.get("/create", unauthenticated, (request, response) => {
     const { team1, team2, id, name } = request.query;
+    // check for team1, team2 and same date !
+    let { month, date } = getTime();
 
-    response.render("createMatch", { home: team1, away: team2, id: id, name: name });
+    Club.findOne({ club_id: id })
+        .then((club) => {
+            let matches = club.club_matches;
+            console.log("Matches: ");
+            console.log(matches);
+
+            let matchIndex = matches.findIndex((match) => match.homeTeam === team1 && match.awayTeam === team2);
+            console.log("Match Index: ");
+            console.log(matchIndex);
+
+            if (matchIndex >= 0) {
+                console.log("Date: ")
+                console.log(date);
+                console.log("Match Date: ");
+                console.log(matches[matchIndex].matchDate);
+                // There is a chance of repetitive match creation
+                if (date === Number(matches[matchIndex].matchDate)) {
+                    response.json({
+                        message: "Match created already"
+                    })
+                } else {
+                    response.render("createMatch", { home: team1, away: team2, id: id, date: date, name: name });
+                }
+            } else {
+                // Create Match !
+                response.render("createMatch", { home: team1, away: team2, id: id, date: date, name: name });
+            }
+        })
+        .catch(err => console.log("Error: ", err));
+
+
 })
 
 app.post("/createMatch", unauthenticated, (request, response) => {
 
-    const { homeTeam, awayTeam, entryPoints, rewardPoints, id, name } = request.body;
+    console.log("CREATE MATCH");
+
+    const { homeTeam, awayTeam, entryPoints, rewardPoints, date, id, name } = request.body;
     console.log(id);
 
     // Check whether admin has coins equal to greater than entry coins !
@@ -300,9 +352,10 @@ app.post("/createMatch", unauthenticated, (request, response) => {
                 }, {
                     $push: {
                         club_matches: {
+                            matchId : Date.now(),
                             homeTeam: homeTeam,
                             awayTeam: awayTeam,
-                            matchDate: new Date().toLocaleTimeString(),
+                            matchDate: date,
                             entryPoint: entryPoints,
                             rewardPoint: rewardPoints
                         }
@@ -311,13 +364,22 @@ app.post("/createMatch", unauthenticated, (request, response) => {
                     $new: true
                 })
                     .then(() => {
-                        console.log("Match Created Successfully !");
-                        response.json({
-                            id: id,
-                            name: name,
-                            message: "Match Created Successfully !",
-                            responseCode: 200
-                        })
+                        // Now deduct entry coins from admin coins !
+                        Club.updateOne(
+                            { club_id: id },
+                            { $set: { club_adminCoin: Number(club.club_adminCoin) - Number(entryPoints) } },
+                            { $new: true })
+                            .then(() => {
+                                console.log("Match Created Successfully !");
+                                response.json({
+                                    id: id,
+                                    name: name,
+                                    message: "Match Created Successfully !",
+                                    responseCode: 200
+                                })
+                            })
+                            .catch(err => console.log("Error :", err));
+
                     })
                     .catch(err => console.log("Error: ", err));
             } else {
@@ -328,6 +390,39 @@ app.post("/createMatch", unauthenticated, (request, response) => {
         })
         .catch(err => console.log("Error: ", err));
 
+});
+
+app.get("/play",unauthenticated,(request,response)=>{
+    // Check whether you have sufficient coins or not !
+    // Use email as primary key
+    let {id,matchID} = request.query;
+
+    Club.findOne({club_id : id})
+        .then((club)=>{
+            let participants = club.participants;
+            let matches = club.club_matches;
+
+            let participantIndex = participants.findIndex((participant)=>participant.email === request.session.email);
+            let matchIndex = matches.findIndex((match)=>match.matchId === matchID);
+
+            if(participantIndex < 0){
+                // This can't happen, just for debugging purpose
+            }else{
+                // Check whether player have sufficient coins to play
+                // Extract entry coins from matches list and user coins from participants list
+                if(participants[participantIndex].coins >= matches[matchIndex].entryPoint){
+                    response.json({
+                        message : "Eligible to play"
+                    });
+                }else{
+                    response.json({
+                        message : "Not eligible"
+                    });
+                }
+            }
+
+        })
+        .catch(err=>console.log("Error: ",err));
 });
 
 app.get("/logout", unauthenticated, (request, response) => {
@@ -343,49 +438,6 @@ const httpServer = app.listen(port, host, () => {
 })
 
 const io = socket(httpServer);
-
-// Get Time !
-function getTime() {
-
-    let month = new Array(12);
-    month[0] = "january";
-    month[1] = "february";
-    month[2] = "march";
-    month[3] = "april";
-    month[4] = "may";
-    month[5] = "june";
-    month[6] = "july";
-    month[7] = "august";
-    month[8] = "september";
-    month[9] = "october";
-    month[10] = "november";
-    month[11] = "december";
-
-    const timeComponent = {};
-
-
-    let currentTime = new Date();
-
-    let currentOffset = currentTime.getTimezoneOffset();
-
-    let ISTOffset = 330;   // IST offset UTC +5:30 
-
-    let ISTTime = new Date(currentTime.getTime() + (ISTOffset + currentOffset) * 60000);
-
-    // ISTTime now represents the time in IST coordinates
-
-    let hoursIST = ISTTime.getHours()
-    let minutesIST = ISTTime.getMinutes()
-    let monthNumber = ISTTime.getMonth();
-    let date = ISTTime.getDate();
-
-    timeComponent.hourtime = hoursIST;
-    timeComponent.minutes = minutesIST;
-    timeComponent.month = month[monthNumber];
-    timeComponent.date = date;
-
-    return timeComponent;
-}
 
 
 // Functions
@@ -464,13 +516,13 @@ io.on("connection", function (client) {
         })
 
 
-    }, 5000);
+    }, 1000);
 
-    client.on("coinstatus", (data) => {
-        io.to(data.id).emit("coins", {
-            coins: data.coins
-        })
-    });
+    // client.on("coinstatus", (data) => {
+    //     io.to(data.id).emit("coins", {
+    //         coins: data.coins
+    //     })
+    // });
 
     // Send connection message to server
     client.on("join", function (data) {
@@ -490,17 +542,20 @@ io.on("connection", function (client) {
             .then((club) => {
                 if (club) {
 
+                    let participants = club.participants;
+                    let participantIndex = participants.findIndex(participant => participant.email === email);
 
                     //Club exists !
                     // Check whether it is our admin or new participant ! 
-                    if (club.admin_email != email) {//That this are our new participants
+                    // Also if participant already exists in the array so, just don't add again and again
+                    if (participantIndex < 0) {//That this are our new participants
                         // // Push name of the client into names array !
                         let status = "participant";
 
                         Club.updateOne({
                             club_id: id
                         }, {
-                            $push: { participants: { name: name,status : status, id: client.id } }
+                            $push: { participants: { name: name, email: email, status: status, id: client.id, coins: 0 } }
                         }, {
                             $new: true
                         })
@@ -509,8 +564,8 @@ io.on("connection", function (client) {
                                 console.log(update);
                                 console.log("Participant Added");
 
-                                io.to(id).emit("room",{
-                                    name : name
+                                io.to(id).emit("room", {
+                                    name: name
                                 })
 
                                 client.join(id);
@@ -527,25 +582,28 @@ io.on("connection", function (client) {
 
 
                     } else {
-                        let status = "admin";
-                        // const room = pushNames(getIndex,name,client.id,status);
+                        if (club.admin_email === email) {
+                            let status = "admin";
+                            // const room = pushNames(getIndex,name,client.id,status);
 
-                        if (getIndex < 0) {
-                            let room = pushRoom(id, group_name, name, client.id, status);
-                        } else {
-                            const statusIndex = rooms[getIndex].names.findIndex(user => user.status === "Admin");
+                            if (getIndex < 0) {
+                                let room = pushRoom(id, group_name, name, client.id, status);
+                            } else {
+                                const statusIndex = rooms[getIndex].names.findIndex(user => user.status === "Admin");
 
-                            if (statusIndex < 0) {
-                                let names = pushNames(getIndex, name, client.id, status);
+                                if (statusIndex < 0) {
+                                    let names = pushNames(getIndex, name, client.id, status);
 
+                                }
                             }
+
+
+                            client.join(id);
+
+                            // emit admin status !
+                            client.emit("adminstatus", { status: true });
                         }
 
-
-                        client.join(id);
-
-                        // emit admin status !
-                        client.emit("adminstatus", { status: true });
 
 
                     }
@@ -565,7 +623,7 @@ io.on("connection", function (client) {
                         admin_email: email,
                         club_creationDate: new Date().toLocaleTimeString(),
                         club_adminCoin: 0,
-                        participants: [{ name: name, id: client.id, status: status }],
+                        participants: [{ name: name, email: email, id: client.id, status: status, coins: "NA" }],
                         club_matches: []
                     }
 
@@ -628,17 +686,21 @@ io.on("connection", function (client) {
         }
 
         // Delete user
-        Club.updateOne({
-            club_id: id
-        }, {
-            $pull: { participants: { id: client.id,status : "participant" } }
-        }, {
-            $new: true
-        })
-            .then(() => {
-                console.log("Someone left !");
-            })
-            .catch(err => console.log("Error: ", err));
+        // Don't completely delete user from database when he/she leaves the group
+        // Delete when he/she wants to completely leave the group and make seperate option for that
+
+        // Club.updateOne({
+        //     club_id: id
+        // }, {
+        //     $pull: { participants: { id: client.id,status : "participant" } }
+        // }, {
+        //     $new: true
+        // })
+        //     .then(() => {
+        //         console.log("Someone left !");
+        //     })
+        //     .catch(err => console.log("Error: ", err));
+
     });
 
 
