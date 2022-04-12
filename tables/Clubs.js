@@ -27,6 +27,17 @@ const clubSchema = new schema({
         type : Number,
         required : true
     },
+    lendRequests : [{
+        name : {
+            type : String
+        },
+        email : {
+            type : String
+        },
+        amount : {
+            type : Number
+        }
+    }],
     participants : [{
         name : {
             type : String

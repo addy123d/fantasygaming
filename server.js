@@ -176,7 +176,7 @@ app.get("/chat", unauthenticated, (request, response) => {
     let matches, participants = [];
     const { name, email } = request.session;
     console.log(request.query.id);
-    let {id} = request.query;
+    let { id } = request.query;
 
     Club.findOne({ club_id: request.query.id })
         .then((club) => {
@@ -352,7 +352,7 @@ app.post("/createMatch", unauthenticated, (request, response) => {
                 }, {
                     $push: {
                         club_matches: {
-                            matchId : Date.now(),
+                            matchId: Date.now(),
                             homeTeam: homeTeam,
                             awayTeam: awayTeam,
                             matchDate: date,
@@ -392,38 +392,76 @@ app.post("/createMatch", unauthenticated, (request, response) => {
 
 });
 
-app.get("/play",unauthenticated,(request,response)=>{
+app.get("/play", unauthenticated, (request, response) => {
     // Check whether you have sufficient coins or not !
     // Use email as primary key
-    let {id,matchID} = request.query;
+    let { id, matchID } = request.query;
+    let eligibility = false;
 
-    Club.findOne({club_id : id})
-        .then((club)=>{
+    Club.findOne({ club_id: id })
+        .then((club) => {
             let participants = club.participants;
             let matches = club.club_matches;
 
-            let participantIndex = participants.findIndex((participant)=>participant.email === request.session.email);
-            let matchIndex = matches.findIndex((match)=>match.matchId === matchID);
+            let participantIndex = participants.findIndex((participant) => participant.email === request.session.email);
+            let matchIndex = matches.findIndex((match) => match.matchId === matchID);
 
-            if(participantIndex < 0){
+            if (participantIndex < 0) {
                 // This can't happen, just for debugging purpose
-            }else{
+            } else {
                 // Check whether player have sufficient coins to play
                 // Extract entry coins from matches list and user coins from participants list
-                if(participants[participantIndex].coins >= matches[matchIndex].entryPoint){
-                    response.json({
-                        message : "Eligible to play"
-                    });
-                }else{
-                    response.json({
-                        message : "Not eligible"
-                    });
+                if (participants[participantIndex].coins >= matches[matchIndex].entryPoint) {
+                    eligibility = true;
+                    response.render("playMatch", { eligibility, id });
+                } else {
+                    response.render("playMatch", { eligibility, id });
                 }
             }
 
         })
-        .catch(err=>console.log("Error: ",err));
+        .catch(err => console.log("Error: ", err));
 });
+
+app.post("/lendpoints", unauthenticated, (request, response) => {
+    let { id, coins } = request.body;
+
+    Club.findOne({ club_id: id })
+        .then((club) => {
+            if (club.club_adminCoin >= coins) {
+                Club.updateOne({
+                    email: request.session.email
+                }, {
+                    $push: {
+                        lendRequests: {
+                            name: request.session.name,
+                            email: request.session.email,
+                            amount: Number(coins)
+                        }
+                    }
+                }, {
+                    $new: true
+                })
+                    .then(() => {
+                        console.log("Lend request sent !");
+                        response.json({
+                            message: "Request sent !"
+                        })
+                    })
+                    .catch(err => console.log("Error: ", err));
+            } else {
+                response.json({
+                    message: "Admin don't have coins"
+                })
+            }
+
+        })
+        .catch(err => console.log("Error: ", err));
+
+
+
+
+})
 
 app.get("/logout", unauthenticated, (request, response) => {
     request.session.destroy(function (err) {
