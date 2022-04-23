@@ -678,7 +678,7 @@ io.on("connection", function (client) {
         // List out particular matches on particular date !
 
         matches.forEach((match) => {
-            if (match.month === month && match.date === date && match.hours >= hourtime && match.minutes >= minutes) {
+            if (match.month === month && match.date === date && (match.hours >= hourtime || match.minutes >= minutes)) {
                 matchesList.push(match);
             }
         })
