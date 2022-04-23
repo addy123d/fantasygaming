@@ -1,0 +1,112 @@
+[
+    {   
+        "name" : "jason roy",
+        "role" : "batsman",
+        "points" : 4.5
+    },
+    {   
+        "name" : "johnny bairstow",
+        "role" : "wicketkeeper",
+        "points" : 9
+    },
+    {   
+        "name" : "joe root",
+        "role" : "batsman",
+        "points" : 4.5
+    },
+    {   
+        "name" : "eoin morgan",
+        "role" : "batsman",
+        "points" : 9
+    },
+    {   
+        "name" : "ben stokes",
+        "role" : "all rounder",
+        "points" : 4.5
+    },
+    {   
+        "name" : "jos buttler",
+        "role" : "wicketkeeper",
+        "points" : 9
+    },
+    {   
+        "name" : "chris woakes",
+        "role" : "all rounder",
+        "points" : 4.5
+    },
+    {   
+        "name" : "liam plunkett",
+        "role" : "bowler",
+        "points" : 9
+    },
+    {   
+        "name" : "jofra archer",
+        "role" : "bowler",
+        "points" : 4.5
+    },
+    {   
+        "name" : "adil rashid",
+        "role" : "bowler",
+        "points" : 9
+    },
+    {   
+        "name" : "mark wood",
+        "role" : "bowler",
+        "points" : 4.5
+    },
+    {   
+        "name" : "kl rahul",
+        "role" : "batsman",
+        "points" : 9
+    },
+    {   
+        "name" : "rohit sharma",
+        "role" : "batsman",
+        "points" : 4.5
+    },
+    {   
+        "name" : "virat kohli",
+        "role" : "batsman",
+        "points" : 9
+    },
+    {   
+        "name" : "rishabh pant",
+        "role" : "wicketkeeper",
+        "points" : 4.5
+    },
+    {   
+        "name" : "hardik pandya",
+        "role" : "all rounder",
+        "points" : 9
+    },
+    {   
+        "name" : "ms dhoni",
+        "role" : "wicketkeeper",
+        "points" : 4.5
+    },
+    {   
+        "name" : "kedar jadhav",
+        "role" : "all rounder",
+        "points" : 4.5
+    },
+    {   
+        "name" : "shami",
+        "role" : "bowler",
+        "points" : 4.5
+    },
+    {   
+        "name" : "kuldeep",
+        "role" : "bowler",
+        "points" : 4.5
+    },
+    {   
+        "name" : "chahal",
+        "role" : "bowler",
+        "points" : 4.5
+    },
+    {   
+        "name" : "bumrah",
+        "role" : "bowler",
+        "points" : 4.5
+    }
+]

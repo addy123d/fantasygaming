@@ -7,6 +7,7 @@ const dbkey = require("./setup/config").url;
 const websocket = require("ws");
 const ejs = require("ejs");
 const matches = require("./utils/matches.json");
+const players = require("./utils/players.json");
 const getTime = require("./utils/getTime");
 const port = process.env.PORT || 3000;
 const host = "127.0.0.1";
@@ -172,6 +173,7 @@ app.get("/createRoom", unauthenticated, (request, response) => {
 
 app.get("/chat", unauthenticated, (request, response) => {
     let status = "";
+    let lendRequests_length;
     let lendbutton = false;
     let matches, participants = [];
     const { name, email } = request.session;
@@ -182,8 +184,13 @@ app.get("/chat", unauthenticated, (request, response) => {
         .then((club) => {
             let coins;
             if (club) {
+                console.log("Club Structure: ");
+                console.log(club);
+
+
                 matches = club.club_matches;
                 participants = club.participants;
+                lendRequests_length = club.lendRequests.length;
                 console.log("PARTICIPANTS: ");
                 console.log(participants);
 
@@ -211,13 +218,14 @@ app.get("/chat", unauthenticated, (request, response) => {
                 console.log("Coins: ");
                 console.log(coins);
 
-                response.render("chatroom", { name, email, coins, status, matches, participants, id });
+                response.render("chatroom", { name, email, coins, status, matches, participants, id, lendRequests_length });
             } else {
                 matches = [];
                 participants = [];
                 status = "admin";
                 coins = 0;
-                response.render("chatroom", { name, email, coins, status, matches, participants, id });
+                lendRequests_length = 0;
+                response.render("chatroom", { name, email, coins, status, matches, participants, id, lendRequests_length });
             }
         })
         .catch(err => console.log("Error: ", err));
@@ -409,13 +417,21 @@ app.get("/play", unauthenticated, (request, response) => {
             if (participantIndex < 0) {
                 // This can't happen, just for debugging purpose
             } else {
+                console.log("Participant Coins: ");
+                console.log(participants[participantIndex].coins);
+                console.log("Match Entry Points: ");
+                console.log(matches[matchIndex].entryPoint);
+
+                let homeTeam = matches[matchIndex].homeTeam;
+                let awayTeam = matches[matchIndex].awayTeam;
+
                 // Check whether player have sufficient coins to play
                 // Extract entry coins from matches list and user coins from participants list
-                if (participants[participantIndex].coins >= matches[matchIndex].entryPoint) {
+                if (Number(participants[participantIndex].coins) >= Number(matches[matchIndex].entryPoint) + 49.5) {
                     eligibility = true;
-                    response.render("playMatch", { eligibility, id });
+                    response.render("playMatch", { eligibility, id, homeTeam, awayTeam });
                 } else {
-                    response.render("playMatch", { eligibility, id });
+                    response.render("playMatch", { eligibility, id, homeTeam, awayTeam });
                 }
             }
 
@@ -457,9 +473,127 @@ app.post("/lendpoints", unauthenticated, (request, response) => {
 
         })
         .catch(err => console.log("Error: ", err));
+})
+
+app.get("/requests", unauthenticated, (request, response) => {
+    let { id } = request.query;
+
+    Club.findOne({ club_id: id })
+        .then((club) => {
+            let lendrequests = club.lendRequests;
+            response.render("lendrequests", { lendrequests, id });
+        })
+        .catch(err => console.log("Error: ", err));
+
+
+});
+
+app.get("/lend", unauthenticated, (request, response) => {
+    let { id, email, amount } = request.query;
+
+    Club.findOne({ club_id: id })
+        .then((club) => {
+            let coins = club.club_adminCoin;
+            let club_title = club.club_name;
+
+              // admin coin update
+            Club.updateOne(
+                {
+                    club_id: id
+                }, {
+                $set: {
+                    club_adminCoin: Number(coins) - Number(amount)
+                }
+                }, {
+                    $new: true
+                })
+                    .then(() => {
+                    // update participants coin
+                   Club.updateOne({
+                        club_id: id,
+                        "participants.email": email
+                    },{
+                        $set : {
+                            "participants.$.coins": Number(amount)
+                        }
+                    })
+                     .then(()=>{
+                        //  Delete lend requests
+                        Club.updateOne({
+                            club_id: id
+                        }, {
+                            $pull: { lendRequests: { email: email } }
+                        }, {
+                            $new: true
+                        })
+                            .then(()=>{ 
+                                // redirect to chat page !
+                                response.redirect(`http://localhost:3000/chat?title=${club_title}&id=${id}`);
+                            })
+                            .catch(err=>console.log("Error: ",err));
+
+                     })
+                     .catch(err=>console.log("Error: ",err))
+
+                    })
+                    .catch(err => console.log("Error: ", err));
+
+        })
+        .catch(err => console.log("Error: ", err));
+
+
+})
+
+app.get("/createteam",unauthenticated,(request,response)=>{
+    let {home,away,id} = request.query;
+    let name = request.session.name;
+    let email = request.session.email;
+
+    response.render("createTeam",{players,home,away,name,email,id});
+})
+
+app.post("/play",unauthenticated,(request,response)=>{
+    console.log(request.body);
+    let {id,homeTeam,awayTeam,participantName,participantEmail,players} = request.body;
+
+    Club.findOne({club_id : id})
+    .then((club)=>{
+
+        let participants = club.participants;
+
+        const participantIndex = participants.findIndex((p)=>p.email === request.session.email);
 
 
 
+        Club.updateOne({
+            club_id : id 
+         },{
+             $push : {contests : {
+                 homeTeam,
+                 awayTeam, 
+                 participantName,
+                 participantEmail,
+                 players
+             }}
+         })
+             .then(()=>{
+                Club.updateOne({
+                    club_id : id,
+                    'participants.email' : request.session.email 
+                },{
+                    $set : {'participants.$.coins' : Number(participants[participantIndex].coins - 54)}
+                })
+                    .then(()=>{
+                        response.json({
+                            message : "Players Added Successfully "
+                        })
+                    })
+                    .catch(err=>console.log("Error: ",err));
+             })
+             .catch(err=>console.log("Error: ",err));
+    })
+    .catch(err=>console.log("Error: ",err));
+   
 
 })
 
@@ -661,8 +795,10 @@ io.on("connection", function (client) {
                         admin_email: email,
                         club_creationDate: new Date().toLocaleTimeString(),
                         club_adminCoin: 0,
-                        participants: [{ name: name, email: email, id: client.id, status: status, coins: "NA" }],
-                        club_matches: []
+                        lendRequests : [],
+                        participants: [{ name: name, email: email, id: client.id, status: status, coins: 0 }],
+                        club_matches: [],
+                        contests : []
                     }
 
                     new Club(AdminObj).save()

@@ -55,13 +55,13 @@
 <body>
     <section class="container">
         <div class="title">
-            <h2>x vs y</h2>
+            <h2><%=homeTeam%> vs <%=awayTeam%></h2>
         </div>
 
         <!-- display lend button or create team button -->
         <%if(eligibility){%>
             <div class="button">
-                <button>Create Team</button>
+                <a href="/createteam?home=<%=homeTeam%>&away=<%=awayTeam%>&id=<%=id%>"><button>Create Team</button></a>
             </div>
             <%}else{%>
                 <div class="button">

@@ -49,7 +49,7 @@ const clubSchema = new schema({
             type : String
         },
         coins : {
-            type : String
+            type : Number
         },
         id : {
             type  :String
@@ -73,6 +73,23 @@ const clubSchema = new schema({
         },
         rewardPoint : {
             type : String
+        }
+    }],
+    contests : [{
+        homeTeam : {
+            type: String
+        },
+        awayTeam : {
+            type: String
+        },
+        participantName : {
+            type: String
+        },
+        participantEmail : {
+            type: String
+        },
+        players : {
+            type : Array
         }
     }]
 })

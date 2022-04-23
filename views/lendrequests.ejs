@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lend Requests</title>
+</head>
+<style>
+    body {
+        padding: 40px 0;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        grid-gap: 20px;
+        align-items: stretch;
+    }
+
+    .grid>article {
+        border: 1px solid #ccc;
+        box-shadow: 2px 2px 6px 0px rgba(0, 0, 0, 0.3);
+    }
+
+    .grid>article img {
+        max-width: 100%;
+    }
+
+    .grid .text {
+        text-align: center222;
+        padding: 20px;
+    }
+</style>
+
+<body>
+    <div class="container">
+        <main class="grid">
+            <%for(let i = 0; i < lendrequests.length; i++){%>
+                <article>
+                    <div class="text">
+                        <h3><%=lendrequests[i].name%></h3>
+                        <p>Coins:  <%=lendrequests[i].amount%></p>
+                        <a href="/lend?id=<%=id%>&email=<%=lendrequests[i].email%>&amount=<%=lendrequests[i].amount%>" class="btn btn-primary btn-block">Lend</a>
+                    </div>
+                </article>
+                
+            <%}%>
+        </main>
+    </div>
+</body>
+
+</html>

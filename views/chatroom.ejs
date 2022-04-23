@@ -361,6 +361,12 @@
     transition: all .7s;
     opacity: 1;
   }
+
+  .requestsButton{
+    position: absolute;
+    top: 50%;
+    left: 80%;
+  }
 </style>
 
 <body>
@@ -377,6 +383,16 @@
         <li>John <i class="fa fa-circle" aria-hidden="true"></i></li>
         <li>Doe <i class="fa fa-circle" aria-hidden="true"></i></li> -->
     </ul>
+  </div>
+
+
+  <%if(status==="admin"){%>
+  <div class="requestsButton">
+    <div class="request">
+      <a href="/requests?id=<%=id%>"><button>Requests <%=lendRequests_length%></button></a>
+    </div>
+    <%}%>
+    
   </div>
   <div class="chatroom">
     <div class="chatroom_section chatroom_header">
