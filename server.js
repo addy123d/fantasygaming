@@ -672,13 +672,13 @@ io.on("connection", function (client) {
     setInterval(() => {
         let matchesList = [];
 
-        let { month, date } = getTime();
+        let { month, date, hourtime, minutes } = getTime();
 
         // Check whether there are matches on particular date and month !
         // List out particular matches on particular date !
 
         matches.forEach((match) => {
-            if (match.month === month && match.date === date) {
+            if (match.month === month && match.date === date && match.hours >= hourtime && match.minutes >= minutes) {
                 matchesList.push(match);
             }
         })

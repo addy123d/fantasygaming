@@ -2,6 +2,8 @@
     {   
         "matchNum" : "match1",
         "date" : 23,
+        "hours" : 16,
+        "minutes" : 30,
         "month" : "april",
         "homeTeam" : "MI",
         "awayTeam" : "RPS",
@@ -15,6 +17,8 @@
     {   
         "matchNum" : "match2",
         "date" : 23,
+        "hours" : 6,
+        "minutes" : 30,
         "month" : "april",
         "homeTeam" : "KKR",
         "awayTeam" : "DD",
@@ -28,6 +32,8 @@
     {   
         "matchNum" : "match3",
         "date" : 23,
+        "hours" : 16,
+        "minutes" : 30,
         "month" : "april",
         "homeTeam" : "KXIP",
         "awayTeam" : "GL",
@@ -41,6 +47,8 @@
     {   
         "matchNum" : "match4",
         "date" : 23,
+        "hours" : 16,
+        "minutes" : 30,
         "month" : "april",
         "homeTeam" : "RCB",
         "awayTeam" : "SH",
