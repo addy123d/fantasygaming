@@ -46,6 +46,11 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    transition: all .3s;
+  }
+
+  .chatroom.active {
+    filter: blur(20px);
   }
 
   .chatroom_section {
@@ -362,76 +367,201 @@
     opacity: 1;
   }
 
-  .requestsButton{
+  .requestsButton,.leaveButton {
     position: absolute;
     top: 50%;
     left: 80%;
+    transform: translate(-50%,-50%);
   }
+
+  .resultButton{
+    position: absolute;
+    top: 80%;
+    left: 80%;
+  }
+
+  .leaveButton{
+    top: 90%;
+    left: 50%;
+  }
+
+  .coincontainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .form {
+    position: absolute;
+    top: -50%;
+    left: 43%;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+    margin: 7%;
+    background: #ffffff;
+    padding: 1em 2em 1em 2em;
+    border-radius: 4px;
+    transition: all .3s;
+  }
+
+  .form.active {
+    top: 20%;
+  }
+
+  .name,
+  .password,
+  .plan,
+  .btn {
+    display: flex;
+    justify-content: center;
+    margin: 10%;
+  }
+
+  input[type="text"] {
+    padding: 1em 1.5em 1em 1.5em;
+    border: none;
+    background: rgb(238, 235, 235);
+    border-radius: 5px;
+    outline: none;
+    font-family: 'Josefin Sans', sans-serif;
+  }
+
+  button {
+    padding: .7em 1em .7em 1em;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    background: rgb(25, 48, 70);
+    color: #ffffff;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    border-radius: 5px;
+    font-size: .8rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 2px #000000;
+  }
+
+  button:hover {
+    transition: all .3s;
+    background: rgb(77, 77, 77)
+  }
+
+  .form h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1.4rem;
+    margin: 2%;
+    border-bottom: .5px dashed #1c1d1e;
+    line-height: 50px;
+  }
+
+  /* .roomPage {
+    background: rgb(55, 154, 247);
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url("https://img.search.brave.com/bOrTB2nAfhf_p4N03qGGhLYGn7Q4MnjP9EtQN-t1RS0/rs:fit:788:800:1/g:ce/aHR0cHM6Ly9kMTNp/cjUzc21xcWV5cC5j/bG91ZGZyb250Lm5l/dC9kMTEtc3RhdGlj/LXBhZ2VzL2xhbmRp/bmdfcGFnZS9ob21l/X2Rlc2t0b3BfZGhv/bmkucG5n");
+    background-size: cover;
+    min-height: 100vh;
+  } */
 </style>
 
 <body>
-  <div class="members">
-    <div class="show">Participants</div>
-    <ul id="list">
 
-      <%for(let i = 0; i < participants.length; i++){%>
-        <li><%=participants[i].name%> <i class="fa fa-circle" aria-hidden="true"></i></li>
-        <%}%>
-      <!-- List will be dependent on javascript ! -->
-      <!-- <li>Aditya <i class="fa fa-circle" aria-hidden="true"></i></li>
+  <div class="roomPage">
+    <div class="coincontainer">
+      <div class="form">
+        <h2>Purchase Coins</h2>
+        <div class="name">
+          <input type="text" id="coins" name="title" placeholder="Coins" autocomplete="off">
+        </div>
+
+        <div class="btn">
+          <button class="purchasebtn">Purchase</button>
+        </div>
+      </div>
+
+      <div class="members">
+        <div class="show">Participants</div>
+        <ul id="list">
+
+          <%for(let i=0; i < participants.length; i++){%>
+            <li>
+              <%=participants[i].name%> <i class="fa fa-circle" aria-hidden="true"></i>
+            </li>
+            <%}%>
+              <!-- List will be dependent on javascript ! -->
+              <!-- <li>Aditya <i class="fa fa-circle" aria-hidden="true"></i></li>
         <li>Joe <i class="fa fa-circle" aria-hidden="true"></i></li>
         <li>John <i class="fa fa-circle" aria-hidden="true"></i></li>
         <li>Doe <i class="fa fa-circle" aria-hidden="true"></i></li> -->
-    </ul>
-  </div>
+        </ul>
+      </div>
 
 
-  <%if(status==="admin"){%>
-  <div class="requestsButton">
-    <div class="request">
-      <a href="/requests?id=<%=id%>"><button>Requests <%=lendRequests_length%></button></a>
-    </div>
-    <%}%>
-    
-  </div>
-  <div class="chatroom">
-    <div class="chatroom_section chatroom_header">
-      <div class="chatroom_section chatroom_header_name">Kitty</div>
-    </div>
-    <div class="chatroom_section chatroom_history">
-      <ul class="chatroom_history_list matchList">
-        <%if(status==="participant" ){%>
-          <%for(let i=0; i < matches.length; i++){%>
-            <li class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey matches">
-              <%=matches[i].homeTeam%> X <%=matches[i].awayTeam%> <a href="/play?id=<%=id%>&matchID=<%=matches[i].matchId%>" style="cursor:pointer">Play</a>
-            </li>
-            <%}%>
-              <%}%>
-      </ul>
-      <!-- <div class="chatroom_history_entering">
+      <%if(status==="admin"){%>
+        <div class="requestsButton">
+          <div class="request">
+            <a href="/requests?id=<%=id%>"><button>Requests <%=lendRequests_length%></button></a>
+          </div>
+        </div>
+        <%}%>
+
+          <div class="resultButton">
+            <div class="result">
+              <a href="/result?id=<%=id%>"><button>Results</button></a>
+            </div>
+          </div>
+
+          <%if(status==="participant"){%>
+          <div class="leaveButton">
+            <div class="leave">
+              <a href="/leaveClub?id=<%=id%>"><button style="background: #e91e32;">Leave</button></a>
+            </div>
+          </div>
+          <%}%>
+
+
+          <div class="chatroom">
+            <div class="chatroom_section chatroom_header">
+              <div class="chatroom_section chatroom_header_name">Kitty</div>
+            </div>
+            <div class="chatroom_section chatroom_history">
+              <ul class="chatroom_history_list matchList">
+                <%if(status==="participant" ){%>
+                  <%for(let i=0; i < matches.length; i++){%>
+                    <li
+                      class="chatroom_history_list_item chatroom_history_list_left chatroom_history_list_item--grey matches">
+                      <%=matches[i].homeTeam%> X <%=matches[i].awayTeam%> <a
+                            href="/play?id=<%=id%>&matchID=<%=matches[i].matchId%>" style="cursor:pointer">Play</a>
+                    </li>
+                    <%}%>
+                      <%}%>
+              </ul>
+              <!-- <div class="chatroom_history_entering">
             <div class="chatroom_history_entering_spinner"></div>
             <span class="chatroom_history_entering_label">Typing</span>
           </div> -->
-    </div>
-    <div class="chatroom_section chatroom_form stylebutton">
-      <!-- <input type="text" class="chatroom_form_inputbox" placeholder="Enter Message">-->
-      <!-- <button type="submit" class="chatroom_form_buyBtn"></button> -->
-      <a class="buyButton"></a>
-      <button type="submit" class="chatroom_form_exitBtn"><i class="fa fa-sign-out" aria-hidden="true"></i>
-        Exit</button>
-    </div>
-  </div>
+            </div>
+            <div class="chatroom_section chatroom_form stylebutton">
+              <!-- <input type="text" class="chatroom_form_inputbox" placeholder="Enter Message">-->
+              <!-- <button type="submit" class="chatroom_form_buyBtn"></button> -->
+              <a class="buyButton"></a>
+              <button type="submit" class="chatroom_form_exitBtn"><i class="fa fa-sign-out" aria-hidden="true"></i>
+                Exit</button>
+            </div>
+          </div>
 
-  <div class="coins">
-    <div class="coinBox">
-      <div class="cointext">
-        <h3>Available Coins</h3>
-      </div>
-      <div class="coinscount">
-        <p>0</p>
-      </div>
-    </div>
-  </div>
+          <div class="coins">
+            <div class="coinBox">
+              <div class="cointext">
+                <h3>Available Coins</h3>
+              </div>
+              <div class="coinscount">
+                <p>0</p>
+              </div>
+            </div>
+          </div>
 
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.3/socket.io.js"
@@ -459,7 +589,10 @@
   console.log("Group ID :", id);
   console.log("Group Name :", group_name);
 
-
+  const purchaseButton = document.querySelector(".purchasebtn");
+  const purchaseForm = document.querySelector(".form");
+  const coinsNumber = document.querySelector("#coins");
+  const chatcontainer = document.querySelector(".chatroom");
   const header = document.querySelector(".chatroom_header_name");
   const exitButton = document.querySelector(".chatroom_form_exitBtn");
   const buyButton = document.querySelector(".buyButton");
@@ -531,7 +664,7 @@
 
     alert(`${data.message}`);
 
-    
+
     location.reload();
   });
 
@@ -608,13 +741,22 @@
     //   document.querySelector("#list").innerHTML = html;
   });
 
+  window.addEventListener("dblclick", () => {
+    purchaseForm.classList.remove("active");
+    chatcontainer.classList.remove("active");
+  })
+
 
   // Buy Button logic
-
   buyButton.addEventListener("click", () => {
-    let coins = Number(prompt("How many coins?"));
+    purchaseForm.classList.add("active");
+    chatcontainer.classList.add("active");
+  })
 
-    let redirect_url = `http://localhost:3000/pay?number_coins=${coins}&title=${group_name}&id=${id}`;
+  purchaseButton.addEventListener("click", () => {
+    // let coins = Number(prompt("How many coins?"));
+
+    let redirect_url = `http://localhost:3000/pay?number_coins=${coinsNumber.value}&title=${group_name}&id=${id}`;
     location.href = redirect_url;
   })
 </script>

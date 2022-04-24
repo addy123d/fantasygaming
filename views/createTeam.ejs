@@ -243,7 +243,7 @@
                 <select id="players">
                     <option hidden>Select Player</option>
                     <%for(let i = 0; i< players.length;i++){%>
-                        <option><%=players[i].name%> (<%=players[i].role%>)</option>
+                        <option><%=players[i].name%></option>
                         <%}%>
                 </select>
             </div>
@@ -287,7 +287,7 @@
         // console.log(player_names);
         uniquePlayers = [...new Set(player_names)];
 
-        if(uniquePlayers.length <= 11){
+        if(uniquePlayers.length < 11){
             
         let html = "";
         uniquePlayers.forEach(element => {
@@ -332,29 +332,6 @@
         }
 
     })
-
-
-
-
-    // socket.on("matches",(data)=>{
-    //     console.log(data);
-
-    //     let html = "";
-    //     data.list.forEach(element => {
-    //         html += `<article>
-    //                 <div class="text">
-    //                     <h3><i class="fa fa-user" aria-hidden="true"></i>
-    //                         ${element.homeTeam} X ${element.awayTeam}
-    //                     </h3>
-    //                     <br/>
-    //                     <a href="#"><button>Create Team</button></a>
-    //                 </div>
-    //             </article>`;
-    //     });
-
-    //     containerGrid.innerHTML = html;
-    // })
-
 
 </script>
 

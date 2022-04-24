@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@500&family=Poppins&family=Montserrat&family=Quicksand&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+        integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="css/room.css">
+    <title>Create Room</title>
+</head>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.form {
+    margin: 7%;
+    background: #ffffff;
+    padding: 1em 2em 1em 2em;
+    border-radius: 4px;
+}
+
+.name,
+.password,
+.plan,
+.btn {
+    display: flex;
+    justify-content: center;
+    margin: 10%;
+}
+
+input[type="text"] {
+    padding: 1em 1.5em 1em 1.5em;
+    border: none;
+    background: rgb(238, 235, 235);
+    border-radius: 5px;
+    outline: none;
+    font-family: 'Josefin Sans', sans-serif;
+}
+
+button {
+    padding: .7em 1em .7em 1em;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    background: rgb(25, 48, 70);
+    color: #ffffff;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    border-radius: 5px;
+    font-size: .8rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 2px #000000;
+}
+
+button:hover {
+    transition: all .3s;
+    background: rgb(77, 77, 77)
+}
+
+.form h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1.4rem;
+    margin: 2%;
+    border-bottom: .5px dashed #1c1d1e;
+    line-height: 50px;
+}
+    .roomPage {
+        background: rgb(55, 154, 247);
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url("https://img.search.brave.com/bOrTB2nAfhf_p4N03qGGhLYGn7Q4MnjP9EtQN-t1RS0/rs:fit:788:800:1/g:ce/aHR0cHM6Ly9kMTNp/cjUzc21xcWV5cC5j/bG91ZGZyb250Lm5l/dC9kMTEtc3RhdGlj/LXBhZ2VzL2xhbmRp/bmdfcGFnZS9ob21l/X2Rlc2t0b3BfZGhv/bmkucG5n");
+        background-size: cover;
+        min-height: 100vh;
+    }
+    .copy_notify {
+        margin: 2%;
+        color: #f5f5f5;
+        font-family: 'Poppins', cursive;
+        transition: all .5s;
+        display: none;
+    }
+</style>
+
+<body>
+    <div class="roomPage">
+            <div class="container">
+                <div class="form">
+                    <h2>Check Result</h2>
+                    <div class="name">
+                        <input type="text" id="home" name="title" placeholder="Home Team" autocomplete="off">
+                    </div>
+                    <div class="id">
+                        <input type="text" id="away" placeholder="Away Team" name="id">
+                    </div>
+
+        <div class="btn">
+            <button class="checkbtn">Check</button>
+        </div>
+    </div>
+
+</body>
+<!-- <script src="/js/generateid.js"></script> -->
+<script>
+
+    const check_button = document.querySelector(".checkbtn");
+    const homeTeam = document.querySelector("#home");
+    const awayTeam = document.querySelector("#away");
+
+    let id = `<%=id%>`;
+ 
+
+    check_button.addEventListener("click",(e)=>{
+
+        e.preventDefault();
+        console.log("click!");
+            location.href = `${location.origin}/resultCheck?home=${homeTeam.value}&away=${awayTeam.value}&id=${id}`;
+    })
+</script>
+</html>

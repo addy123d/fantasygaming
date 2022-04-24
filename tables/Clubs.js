@@ -90,6 +90,9 @@ const clubSchema = new schema({
         },
         players : {
             type : Array
+        },
+        rewardPoint : {
+            type : String
         }
     }]
 })

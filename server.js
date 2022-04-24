@@ -8,6 +8,8 @@ const websocket = require("ws");
 const ejs = require("ejs");
 const matches = require("./utils/matches.json");
 const players = require("./utils/players.json");
+const result = require("./utils/playersResult.json");
+const declareWinner = require("./utils/declareWinner");
 const getTime = require("./utils/getTime");
 const port = process.env.PORT || 3000;
 const host = "127.0.0.1";
@@ -169,6 +171,16 @@ app.get("/login", authenticated, (request, response) => {
 
 app.get("/createRoom", unauthenticated, (request, response) => {
     response.render("room.ejs");
+})
+
+app.get("/join",unauthenticated, (request, response) => {
+    response.render("joinRoom.ejs");
+})
+
+app.get("/requestCoins",unauthenticated, (request, response) => {
+    let {id} = request.query;
+
+    response.render("requestCoins.ejs",{id});
 })
 
 app.get("/chat", unauthenticated, (request, response) => {
@@ -375,7 +387,7 @@ app.post("/createMatch", unauthenticated, (request, response) => {
                         // Now deduct entry coins from admin coins !
                         Club.updateOne(
                             { club_id: id },
-                            { $set: { club_adminCoin: Number(club.club_adminCoin) - Number(entryPoints) } },
+                            { $set: { club_adminCoin: Number(club.club_adminCoin) - Number(rewardPoints) } },
                             { $new: true })
                             .then(() => {
                                 console.log("Match Created Successfully !");
@@ -496,7 +508,7 @@ app.get("/lend", unauthenticated, (request, response) => {
             let coins = club.club_adminCoin;
             let club_title = club.club_name;
 
-              // admin coin update
+            // admin coin update
             Club.updateOne(
                 {
                     club_id: id
@@ -504,39 +516,39 @@ app.get("/lend", unauthenticated, (request, response) => {
                 $set: {
                     club_adminCoin: Number(coins) - Number(amount)
                 }
-                }, {
-                    $new: true
-                })
-                    .then(() => {
+            }, {
+                $new: true
+            })
+                .then(() => {
                     // update participants coin
-                   Club.updateOne({
+                    Club.updateOne({
                         club_id: id,
                         "participants.email": email
-                    },{
-                        $set : {
+                    }, {
+                        $set: {
                             "participants.$.coins": Number(amount)
                         }
                     })
-                     .then(()=>{
-                        //  Delete lend requests
-                        Club.updateOne({
-                            club_id: id
-                        }, {
-                            $pull: { lendRequests: { email: email } }
-                        }, {
-                            $new: true
-                        })
-                            .then(()=>{ 
-                                // redirect to chat page !
-                                response.redirect(`http://localhost:3000/chat?title=${club_title}&id=${id}`);
+                        .then(() => {
+                            //  Delete lend requests
+                            Club.updateOne({
+                                club_id: id
+                            }, {
+                                $pull: { lendRequests: { email: email } }
+                            }, {
+                                $new: true
                             })
-                            .catch(err=>console.log("Error: ",err));
+                                .then(() => {
+                                    // redirect to chat page !
+                                    response.redirect(`http://localhost:3000/chat?title=${club_title}&id=${id}`);
+                                })
+                                .catch(err => console.log("Error: ", err));
 
-                     })
-                     .catch(err=>console.log("Error: ",err))
+                        })
+                        .catch(err => console.log("Error: ", err))
 
-                    })
-                    .catch(err => console.log("Error: ", err));
+                })
+                .catch(err => console.log("Error: ", err));
 
         })
         .catch(err => console.log("Error: ", err));
@@ -544,57 +556,164 @@ app.get("/lend", unauthenticated, (request, response) => {
 
 })
 
-app.get("/createteam",unauthenticated,(request,response)=>{
-    let {home,away,id} = request.query;
+app.get("/createteam", unauthenticated, (request, response) => {
+    let { home, away, id } = request.query;
     let name = request.session.name;
     let email = request.session.email;
 
-    response.render("createTeam",{players,home,away,name,email,id});
+    response.render("createTeam", { players, home, away, name, email, id });
 })
 
-app.post("/play",unauthenticated,(request,response)=>{
+app.post("/play", unauthenticated, (request, response) => {
     console.log(request.body);
-    let {id,homeTeam,awayTeam,participantName,participantEmail,players} = request.body;
+    let { id, homeTeam, awayTeam, participantName, participantEmail, players } = request.body;
 
-    Club.findOne({club_id : id})
-    .then((club)=>{
+    Club.findOne({ club_id: id })
+        .then((club) => {
 
-        let participants = club.participants;
+            let participants = club.participants;
+            let clubMatches = club.club_matches;
+            let matches = [];
 
-        const participantIndex = participants.findIndex((p)=>p.email === request.session.email);
+            clubMatches.forEach(match=>{
+                if(match.homeTeam === homeTeam && match.awayTeam === awayTeam){
+                    matches.push(match);
+                }
+            })
+
+            const participantIndex = participants.findIndex((p) => p.email === request.session.email);
+            let rewardPoint = matches[0].rewardPoint;
 
 
 
-        Club.updateOne({
-            club_id : id 
-         },{
-             $push : {contests : {
-                 homeTeam,
-                 awayTeam, 
-                 participantName,
-                 participantEmail,
-                 players
-             }}
-         })
-             .then(()=>{
-                Club.updateOne({
-                    club_id : id,
-                    'participants.email' : request.session.email 
-                },{
-                    $set : {'participants.$.coins' : Number(participants[participantIndex].coins - 54)}
-                })
-                    .then(()=>{
-                        response.json({
-                            message : "Players Added Successfully "
-                        })
+            Club.updateOne({
+                club_id: id
+            }, {
+                $push: {
+                    contests: {
+                        homeTeam,
+                        awayTeam,
+                        participantName,
+                        participantEmail,
+                        players,
+                        rewardPoint
+                    }
+                }
+            })
+                .then(() => {
+
+                    Club.updateOne({
+                        club_id : id,
+                        'participants.email' : request.session.email 
+                    },{
+                        $set : {'participants.$.coins' : Number(participants[participantIndex].coins - Number(matches[0].entryPoint))}
                     })
-                    .catch(err=>console.log("Error: ",err));
-             })
-             .catch(err=>console.log("Error: ",err));
-    })
-    .catch(err=>console.log("Error: ",err));
-   
+                        .then(()=>{
+                            response.json({
+                                message : "Players Added Successfully"
+                            })
+                        })
+                        .catch(err=>console.log("Error: ",err));
 
+                })
+                .catch(err => console.log("Error: ", err));
+        })
+        .catch(err => console.log("Error: ", err));
+
+
+})
+
+app.get("/result", unauthenticated, (request, response) => {
+    response.render("result",{id : request.query.id});
+})
+
+app.get("/resultCheck", unauthenticated, (request, response) => {
+    let { home, away, id } = request.query;
+
+    let resultArray = [];
+    let resultMatches = [];
+    let sum;
+
+    Club.findOne({ club_id: id })
+        .then((club) => {
+            let contests = club.contests;
+
+            contests.forEach(contest => {
+                if (contest.homeTeam === home && contest.awayTeam === away) {
+                    resultMatches.push(contest);
+                }
+            })
+
+
+            for (let i = 0; i < resultMatches.length; i++) {
+                sum = 0;
+                let obj = { email: resultMatches[i].participantEmail, name: resultMatches[i].participantName, points: 0 };
+                resultArray.push(obj);
+
+                console.log("Result Array");
+                console.log(resultArray);
+                for (let j = 0; j < result.length; j++) {
+                    for (let k = 0; k < resultMatches[i].players.length; k++) {
+                        // console.log("Player Name from JSON: ");
+                        // console.log(result[j].name);
+
+                        // console.log("Player Name from Database: ");
+                        // console.log(resultMatches[i].players[k]);
+
+                        if (result[j].name === resultMatches[i].players[k]) {
+                            sum = sum + result[j].points;
+                            console.log("Sum");
+                            console.log(sum);
+                            resultArray[i].points = sum;
+                        }
+                    }
+                }
+            }
+
+
+            // response.json(resultArray);
+
+            let winnerArray = declareWinner(resultArray);
+
+            // response.json(winnerArray);
+            // response.render("resultPage",{winnerArray});
+            Club.findOne({club_id : id})
+                .then((club)=>{
+                    let participants = club.participants;
+
+                    let participantIndex = participants.findIndex(participant=>participant.email === winnerArray[0].email);
+
+                    let totalCoins = participants[participantIndex].coins;
+
+                    Club.updateOne({
+                        club_id : id,
+                        'participants.email' : winnerArray[0].email
+                    },{
+                        $set : {'participants.$.coins' : Number(totalCoins) + Number(resultMatches[0].rewardPoint)}
+                    }).then(()=>{
+                            response.render("resultPage",{winnerArray});
+                    })
+                    .catch(err=>console.log("Error: ",err))
+                })
+                .catch(err=>console.log("Error: ",err));
+        })
+        .catch(err => console.log("Error: ", err));
+})
+
+app.get("/leaveClub", unauthenticated, (request, response) => {
+    let {id} = request.query;
+
+    Club.updateOne({
+        club_id : id
+    },{
+        $pull : {participants : {email : request.session.email}}
+    },{
+        $new : true
+    })
+        .then(()=>{
+            response.redirect("/");
+        })
+        .catch(err=>console.log("Error: ",err));
 })
 
 app.get("/logout", unauthenticated, (request, response) => {
@@ -795,10 +914,10 @@ io.on("connection", function (client) {
                         admin_email: email,
                         club_creationDate: new Date().toLocaleTimeString(),
                         club_adminCoin: 0,
-                        lendRequests : [],
+                        lendRequests: [],
                         participants: [{ name: name, email: email, id: client.id, status: status, coins: 0 }],
                         club_matches: [],
-                        contests : []
+                        contests: []
                     }
 
                     new Club(AdminObj).save()

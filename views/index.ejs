@@ -8,6 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
         integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
     <title>Fantasy Gaming App</title>
 </head>
 <style>
@@ -18,13 +21,15 @@
 
     html,
     body {
-        background: #f0f0f0;
+        background: #f1f5f6;
+        font-family: 'Poppins', sans-serif;
     }
 
     .explorePage {
-        background: #f0f0f0;
+        background: #f1f5f6;
         background-size: cover;
         min-height: 100vh;
+       
     }
 
     .grid {
@@ -81,7 +86,7 @@
     .logo h2 {
         font-size: 2.3rem;
         color: #222;
-        font-family: 'Antonio', sans-serif;
+        font-family: 'Poppins', sans-serif;
         user-select: none;
     }
 
@@ -187,7 +192,7 @@
         }
     }
 
-    a{
+    a {
         cursor: pointer;
     }
 
@@ -224,18 +229,20 @@
     <div class="authButton">
         <%if(sessionStatus){%>
             <a href="/createRoom"><button class="cta create">
-                <span class="hover-underline-animation"> CLUBS </span>
-            </button></a>
+                    <span class="hover-underline-animation" style="font-family: 'Poppins', sans-serif;"> CLUBS </span>
+                </button></a>
             <%}else{%>
                 <a href="/register"><button class="cta">
-                    <span class="hover-underline-animation"> Join Now </span>
-                    <svg id="arrow-horizontal" xmlns="http://www.w3.org/2000/svg" width="30" height="10" viewBox="0 0 46 16">
-                        <path id="Path_10" data-name="Path 10"
-                            d="M8,0,6.545,1.455l5.506,5.506H-30V9.039H12.052L6.545,14.545,8,16l8-8Z" transform="translate(30)">
-                        </path>
-                    </svg>
-                </button></a>
-            <%}%>
+                        <span class="hover-underline-animation"> Join Now </span>
+                        <svg id="arrow-horizontal" xmlns="http://www.w3.org/2000/svg" width="30" height="10"
+                            viewBox="0 0 46 16">
+                            <path id="Path_10" data-name="Path 10"
+                                d="M8,0,6.545,1.455l5.506,5.506H-30V9.039H12.052L6.545,14.545,8,16l8-8Z"
+                                transform="translate(30)">
+                            </path>
+                        </svg>
+                    </button></a>
+                <%}%>
 
     </div>
     <section class="explorePage">
@@ -267,7 +274,7 @@
         console.log(data.message);
     });
 
-    socket.on("matches",(data)=>{
+    socket.on("matches", (data) => {
         console.log(data);
 
         let html = "";
@@ -278,7 +285,7 @@
                             ${element.homeTeam} X ${element.awayTeam}
                         </h3>
                         <br/>
-                        <a href="#"><button>Create Team</button></a>
+                        <a href="/createRoom"><button>Create Team</button></a>
                     </div>
                 </article>`;
         });

@@ -114,7 +114,7 @@ button:hover {
         </form>
 
         <div class="btn">
-            <button class="joinbtn">Join Club</button>
+            <a href="/join"><button class="joinbtn">Join Club</button></a>
         </div>
     </div>
     <!-- Link production ! -->
@@ -181,19 +181,19 @@ button:hover {
         e.preventDefault();
         console.log("click!");
 
-        let id = prompt("Enter Group ID: ");
-        let group_name = prompt("Enter Group Name: ");
-        console.log("ID: ");
-        console.log(id);
-        console.log("Group Name: ");
-        console.log(group_name);
+        // let id = prompt("Enter Group ID: ");
+        // let group_name = prompt("Enter Group Name: ");
+        // console.log("ID: ");
+        // console.log(id);
+        // console.log("Group Name: ");
+        // console.log(group_name);
 
-        if(id!=null && group_name!=null){
-            //Redirect to chat page !
-            location.href = `${location.origin}/chat?title=${group_name}&id=${id}`;
-        }
+        // if(id!=null && group_name!=null){
+        //     //Redirect to chat page !
+            location.href = `${location.origin}/join`;
+        // }
 
-        // console.log(`URL: ${location.origin}/chat?title=${group_name}&id=${id}`);
+        // // console.log(`URL: ${location.origin}/chat?title=${group_name}&id=${id}`);
 
 
     })

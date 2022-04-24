@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <base href="/">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+        integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <title>Fantasy Gaming App</title>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    html,
+    body {
+        background: #f0f0f0;
+    }
+
+    .explorePage {
+        background: #f0f0f0;
+        background-size: cover;
+        min-height: 100vh;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-gap: 20px;
+        align-items: stretch;
+        margin: 3%;
+    }
+
+    .grid>article {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        border: 1px solid #ccc;
+        box-shadow: 2px 2px 6px 0px rgba(0, 0, 0, 0.3);
+        padding: 2em;
+    }
+
+    .grid>article img {
+        max-width: 100%;
+    }
+
+    .text {
+        padding: 0 20px 20px;
+    }
+
+    .text>a button {
+        background: rgb(25, 48, 70);
+        color: #ffffff;
+        font-weight: 500;
+        font-family: 'Poppins', sans-serif;
+        text-transform: uppercase;
+        font-weight: bold;
+        letter-spacing: 1px;
+        text-shadow: 1px 1px 2px #000000;
+        transition: .3s;
+        border: 0;
+        padding: 10px;
+        width: 100%;
+        cursor: pointer;
+    }
+
+    .text>button:hover {
+        background: rgb(72, 77, 82);
+    }
+
+    /* LOGO */
+    .logo {
+        margin: 2%;
+    }
+
+    .logo h2 {
+        font-size: 2.3rem;
+        color: #222;
+        font-family: 'Antonio', sans-serif;
+        user-select: none;
+    }
+
+    .logo span {
+        color: rgb(25, 48, 70);
+        font-size: 2.5rem;
+    }
+
+    /* Text */
+    .text h3 {
+        text-align: center;
+        font-family: 'Poppins', sans-serif;
+        margin: 3%;
+    }
+
+    .text p {
+        font-family: 'Poppins', sans-serif;
+        text-align: center;
+        margin: 4%;
+    }
+
+    /* Search */
+    .input,
+    .searchBtn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+    }
+
+    select,input {
+        padding: 1em;
+        outline: none;
+        border: none;
+        border-radius: 10px;
+        background: #ffffff;
+        box-shadow: inset 11px 11px 22px #e6e6e6,
+            inset -11px -11px 22px #ffffff;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .searchBtn button {
+        margin-top: 2%;
+        padding: .7em 1em .7em 1em;
+        outline: none;
+        border: none;
+        cursor: pointer;
+        background: rgb(25, 48, 70);
+        color: #ffffff;
+        font-weight: 500;
+        font-family: 'Poppins',
+            sans-serif;
+        border-radius: 5px;
+        font-size: .8rem;
+        text-transform: uppercase;
+        font-weight: bold;
+        letter-spacing: 1px;
+        text-shadow: 1px 1px 2px #000000;
+        transition: .3s;
+    }
+
+    .searchBtn button:hover {
+        background: rgb(72, 77, 82);
+    }
+
+    /* Sign-Out */
+
+    .options {
+        position: fixed;
+        top: 5%;
+        right: 10%;
+    }
+
+    .options a .option-icon {
+        background: #ffffff;
+        padding: .5em;
+        border-radius: 10px;
+        box-shadow: 2px 2px 6px 0px rgba(0, 0, 0, 0.3);
+        cursor: pointer;
+    }
+
+    .options a .option-icon i {
+        font-size: 2rem;
+    }
+
+    .authButton {
+        position: absolute;
+        top: 5%;
+        left: 80%;
+        transform: translate(-50%, -50%);
+    }
+
+
+    @media (max-width: 730px) {
+        .grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 530px) {
+        .grid {
+            grid-template-columns: 100%;
+        }
+    }
+
+    a{
+        cursor: pointer;
+    }
+
+    .cta {
+        cursor: pointer;
+        outline: none;
+        border: none;
+        background: none;
+    }
+
+    .cta span {
+        padding-bottom: 7px;
+        letter-spacing: 4px;
+        font-size: 1rem;
+        padding-right: 15px;
+        text-transform: uppercase;
+    }
+
+    .cta svg {
+        transform: translateX(-8px);
+        transition: all 0.3s ease;
+    }
+
+    .cta:hover svg {
+        transform: translateX(0);
+    }
+
+    .cta:active svg {
+        transform: scale(0.9);
+    }
+
+    .select{
+        display: flex;
+        justify-content: center;
+    }
+
+    .select > div{
+        padding: 1em;
+    }
+</style>
+
+<body>
+    <section class="explorePage">
+
+        <div class="logo">
+            <a href="/" style="text-decoration: none;">
+                <h2>Results</h2>
+            </a>
+        </div>
+
+        <div class="grid">
+
+            <%for(let i = 0; i < winnerArray.length; i++){%>
+                <article>
+                    <div class="text">
+                        <h3><i class="fa fa-user" aria-hidden="true"></i>
+                          <%=winnerArray[i].name%>
+                        </h3>
+                        <br/>
+                        <p><strong><%=winnerArray[i].points%></strong></p>
+                    </div>
+                </article>
+                <%}%>
+            <!-- <article>
+                <div class="text">
+                    <h3><i class="fa fa-user" aria-hidden="true"></i>
+                      ${element.homeTeam} X ${element.awayTeam}
+                    </h3>
+                    <br/>
+                    <a href="#"><button>Create Team</button></a>
+                </div>
+            </article> -->
+        </div>
+    </section>
+</body>
+
+</html>
