@@ -10,6 +10,7 @@ const matches = require("./utils/matches.json");
 const players = require("./utils/players.json");
 const result = require("./utils/playersResult.json");
 const declareWinner = require("./utils/declareWinner");
+const winnerMail = require("./utils/email");
 const getTime = require("./utils/getTime");
 const port = process.env.PORT || 3000;
 const host = "127.0.0.1";
@@ -627,9 +628,31 @@ app.get("/result", unauthenticated, (request, response) => {
     response.render("result",{id : request.query.id});
 })
 
-app.get("/resultCheck", unauthenticated, (request, response) => {
-    let { home, away, id } = request.query;
 
+let declaredResults = [];
+
+
+app.get("/resultDeclare", unauthenticated, (request, response) => {
+    let { home, away, id } = request.query;
+    let flag = false;
+
+    // Check results
+
+    if(declaredResults.length !== 0){
+        declaredResults.forEach(result=>{
+            if(result.home === home && result.away === away){
+                flag = true
+            }
+        })
+    }else{
+        flag = false;
+    }
+
+    console.log("Flag: ");
+    console.log(flag);
+ 
+
+    
     let resultArray = [];
     let resultMatches = [];
     let sum;
@@ -675,9 +698,8 @@ app.get("/resultCheck", unauthenticated, (request, response) => {
 
             let winnerArray = declareWinner(resultArray);
 
-            // response.json(winnerArray);
-            // response.render("resultPage",{winnerArray});
-            Club.findOne({club_id : id})
+            if(flag === false){
+                Club.findOne({club_id : id})
                 .then((club)=>{
                     let participants = club.participants;
 
@@ -691,11 +713,35 @@ app.get("/resultCheck", unauthenticated, (request, response) => {
                     },{
                         $set : {'participants.$.coins' : Number(totalCoins) + Number(resultMatches[0].rewardPoint)}
                     }).then(()=>{
-                            response.render("resultPage",{winnerArray});
+                            declaredResults.push({home : home, away: away, id : id});
+
+                            let body = `Congratulations ${winnerArray[0].name}, You have won ${home} vs ${away} contest. Reward Points added successfully !`;
+
+                            winnerMail(winnerArray[0].email, body, (err) => {
+                                // if (err) {
+                                //     console.log("Error: ",err);
+                                //     response.send("Mail Error");
+                                //     // response.status(503).json({
+                                //     //     message: `Mail Error`,
+                                //     //     order: order
+                                //     // })
+                                // } else {
+                                    console.log("Coins Added");
+                                    console.log("Mail sent")
+                                    response.render("resultPage",{winnerArray});
+                                // }
+                            });
+                            
                     })
                     .catch(err=>console.log("Error: ",err))
                 })
                 .catch(err=>console.log("Error: ",err));
+            }else{
+                response.render("resultPage",{winnerArray});
+            }
+            // response.json(winnerArray);
+            // response.render("resultPage",{winnerArray});
+   
         })
         .catch(err => console.log("Error: ", err));
 })

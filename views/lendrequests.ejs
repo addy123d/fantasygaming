@@ -5,11 +5,15 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
     <title>Lend Requests</title>
 </head>
 <style>
     body {
-        padding: 40px 0;
+        padding: 10px 0;
+        font-family: 'Poppins',sans-serif;
     }
 
     .grid {
@@ -17,6 +21,7 @@
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         grid-gap: 20px;
         align-items: stretch;
+        margin: 2%;
     }
 
     .grid>article {
@@ -29,20 +34,39 @@
     }
 
     .grid .text {
-        text-align: center222;
+        text-align: center;
         padding: 20px;
+    }
+
+    .title{
+        margin: 1%;
+        font-size: 2rem;
+    }
+
+    a{
+        text-decoration: none;
+        background: #1c1d1e;
+        padding: .8em;
+        color: #f1f5f3;
+        letter-spacing: 1px;
+        border-radius: 10px;
     }
 </style>
 
 <body>
     <div class="container">
+        <div class="title">
+            <h2>Coin Requests</h2>
+        </div>
+    
         <main class="grid">
             <%for(let i = 0; i < lendrequests.length; i++){%>
                 <article>
                     <div class="text">
                         <h3><%=lendrequests[i].name%></h3>
                         <p>Coins:  <%=lendrequests[i].amount%></p>
-                        <a href="/lend?id=<%=id%>&email=<%=lendrequests[i].email%>&amount=<%=lendrequests[i].amount%>" class="btn btn-primary btn-block">Lend</a>
+                        <br/>
+                        <a href="/lend?id=<%=id%>&email=<%=lendrequests[i].email%>&amount=<%=lendrequests[i].amount%>" class="btn btn-primary btn-block">Accept</a>
                     </div>
                 </article>
                 

@@ -326,7 +326,11 @@
             fetch('/play',options)
                 .then(res=>res.json())
                 .then((response)=>{
-                    alert(response.message);
+                    // alert(response.message);
+
+                    if(response.message === "Players Added Successfully"){
+                        location.href = `${location.origin}/`;
+                    }
                 })
                 .catch(err=>console.log("Error: ",err));
         }
