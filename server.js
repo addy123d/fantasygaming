@@ -15,8 +15,8 @@ const getTime = require("./utils/getTime");
 const port = process.env.PORT || 3000;
 const host = "127.0.0.1";
 
-const API_KEY = 'test_daff4b449d066d06e79d3e74db9';
-const AUTH_KEY = 'test_5d451fdb1c7d1e640cae8902ea4';
+const API_KEY = '';
+const AUTH_KEY = '';
 
 Insta.setKeys(API_KEY, AUTH_KEY);
 Insta.isSandboxMode(true);
